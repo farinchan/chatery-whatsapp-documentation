@@ -7,7 +7,7 @@
 >
 	<div class="flex items-center gap-3">
 		<div>
-			Developed by <a href="https://farin.io" target="_blank">Farin</a> Deployed by <a href="https://appwrite.io" target="_blank">Appwrite</a>.
+			Developed by <a href="https://fajri.gariskode.com" target="_blank">Fajri Rinaldi Chan</a> Deployed by <a href="https://appwrite.io" target="_blank">Appwrite</a>.
 		</div>
 	</div>
 
