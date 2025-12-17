@@ -1,0 +1,210 @@
+---
+title: Sessions
+group: API Reference
+description: Manage WhatsApp sessions - create, connect, configure, and delete sessions.
+priority: 10
+---
+
+## Overview
+
+Sessions API allows you to manage multiple WhatsApp accounts. Each session represents a connected WhatsApp account with its own authentication, webhooks, and configuration.
+
+**Base URL:** `http://localhost:3000/api/whatsapp`
+
+---
+
+## List All Sessions
+
+Get a list of all WhatsApp sessions.
+
+```http
+GET /sessions
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Sessions retrieved",
+  "data": [
+    {
+      "sessionId": "mysession",
+      "status": "connected",
+      "isConnected": true,
+      "phoneNumber": "628123456789",
+      "name": "John Doe"
+    }
+  ]
+}
+```
+
+---
+
+## Create/Connect Session
+
+Create a new WhatsApp session or reconnect an existing one.
+
+```http
+POST /sessions/:sessionId/connect
+```
+
+**Body (Optional):**
+```json
+{
+  "metadata": {
+    "userId": "user123",
+    "plan": "premium",
+    "customField": "any value"
+  },
+  "webhooks": [
+    { "url": "https://your-server.com/webhook", "events": ["all"] },
+    { "url": "https://backup-server.com/webhook", "events": ["message"] }
+  ]
+}
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `metadata` | object | Optional. Custom metadata to store with session |
+| `webhooks` | array | Optional. Array of webhook configs `[{ url, events }]` |
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Session created",
+  "data": {
+    "sessionId": "mysession",
+    "status": "qr_ready",
+    "qrCode": "data:image/png;base64,...",
+    "metadata": { "userId": "user123" },
+    "webhooks": [
+      { "url": "https://your-server.com/webhook", "events": ["all"] }
+    ]
+  }
+}
+```
+
+---
+
+## Update Session Config
+
+Update metadata and webhooks for an existing session.
+
+```http
+PATCH /sessions/:sessionId/config
+```
+
+**Body:**
+```json
+{
+  "metadata": { "newField": "value" },
+  "webhooks": [
+    { "url": "https://new-webhook.com/endpoint", "events": ["message", "connection.update"] }
+  ]
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Session config updated",
+  "data": {
+    "sessionId": "mysession",
+    "metadata": { "userId": "user123", "newField": "value" },
+    "webhooks": [
+      { "url": "https://new-webhook.com/endpoint", "events": ["message", "connection.update"] }
+    ]
+  }
+}
+```
+
+---
+
+## Add Webhook
+
+Add a new webhook URL to an existing session.
+
+```http
+POST /sessions/:sessionId/webhooks
+```
+
+**Body:**
+```json
+{
+  "url": "https://another-server.com/webhook",
+  "events": ["message", "connection.update"]
+}
+```
+
+---
+
+## Remove Webhook
+
+Remove a webhook URL from a session.
+
+```http
+DELETE /sessions/:sessionId/webhooks
+```
+
+**Body:**
+```json
+{
+  "url": "https://another-server.com/webhook"
+}
+```
+
+---
+
+## Get Session Status
+
+Get the current status of a session.
+
+```http
+GET /sessions/:sessionId/status
+```
+
+---
+
+## Get QR Code (JSON)
+
+Get the QR code in base64 format.
+
+```http
+GET /sessions/:sessionId/qr
+```
+
+---
+
+## Get QR Code (Image)
+
+Get the QR code as a PNG image that can be displayed directly in browser or scanned.
+
+```http
+GET /sessions/:sessionId/qr/image
+```
+
+> **Note:** Returns a PNG image that can be displayed directly in browser or scanned.
+
+---
+
+## Delete Session
+
+Delete a session and all its data.
+
+```http
+DELETE /sessions/:sessionId
+```
+
+---
+
+## Session Status Values
+
+| Status | Description |
+|--------|-------------|
+| `connecting` | Session is being initialized |
+| `qr_ready` | QR code is ready for scanning |
+| `connected` | Session is connected and ready |
+| `disconnected` | Session is disconnected |
+| `error` | An error occurred |

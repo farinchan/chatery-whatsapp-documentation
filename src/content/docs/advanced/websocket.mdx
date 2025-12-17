@@ -1,0 +1,206 @@
+---
+title: WebSocket Events
+group: Advanced
+description: Real-time WebSocket events for receiving instant notifications and updates.
+priority: 10
+---
+
+## Overview
+
+Chatery WhatsApp API provides real-time WebSocket support for receiving instant notifications about messages, connection status, and other events.
+
+**WebSocket URL:** `ws://localhost:3000`
+
+---
+
+## Connection
+
+Connect to the WebSocket server using Socket.IO client:
+
+```javascript
+const socket = io('http://localhost:3000');
+
+socket.on('connect', () => {
+  console.log('Connected to WebSocket');
+});
+
+socket.on('disconnect', () => {
+  console.log('Disconnected from WebSocket');
+});
+```
+
+---
+
+## Events
+
+### Connection Events
+
+| Event | Description |
+|-------|-------------|
+| `connection.update` | Session connection status changed |
+| `qr.update` | New QR code generated |
+| `session.ready` | Session is fully connected and ready |
+| `session.disconnected` | Session was disconnected |
+
+### Message Events
+
+| Event | Description |
+|-------|-------------|
+| `message` | New message received |
+| `message.sent` | Message was sent successfully |
+| `message.update` | Message status updated (delivered, read, etc.) |
+| `message.delete` | Message was deleted |
+| `message.reaction` | Message reaction added/removed |
+
+### Presence Events
+
+| Event | Description |
+|-------|-------------|
+| `presence.update` | Contact presence changed (online, typing, etc.) |
+
+### Group Events
+
+| Event | Description |
+|-------|-------------|
+| `group.update` | Group info updated |
+| `group.participants.update` | Group participants changed |
+
+---
+
+## Event Payloads
+
+### Message Event
+
+```javascript
+socket.on('message', (data) => {
+  console.log('New message:', data);
+  // {
+  //   sessionId: 'mysession',
+  //   type: 'message',
+  //   data: {
+  //     id: 'message_id',
+  //     from: '628123456789@s.whatsapp.net',
+  //     to: '628987654321@s.whatsapp.net',
+  //     type: 'text',
+  //     content: 'Hello World!',
+  //     timestamp: 1609459200,
+  //     isGroup: false,
+  //     pushName: 'John Doe'
+  //   }
+  // }
+});
+```
+
+### Connection Update Event
+
+```javascript
+socket.on('connection.update', (data) => {
+  console.log('Connection update:', data);
+  // {
+  //   sessionId: 'mysession',
+  //   type: 'connection.update',
+  //   data: {
+  //     status: 'connected', // or 'disconnected', 'qr_ready', etc.
+  //     qr: 'base64_qr_code' // only when status is 'qr_ready'
+  //   }
+  // }
+});
+```
+
+### Group Update Event
+
+```javascript
+socket.on('group.participants.update', (data) => {
+  console.log('Group update:', data);
+  // {
+  //   sessionId: 'mysession',
+  //   type: 'group.participants.update',
+  //   data: {
+  //     groupId: '123456789@g.us',
+  //     action: 'add', // or 'remove', 'promote', 'demote'
+  //     participants: ['628123456789@s.whatsapp.net']
+  //   }
+  // }
+});
+```
+
+---
+
+## Example: Listen for Messages
+
+```javascript
+const io = require('socket.io-client');
+
+const socket = io('http://localhost:3000');
+
+// Listen for all events
+socket.onAny((eventName, ...args) => {
+  console.log(`Event: ${eventName}`, args);
+});
+
+// Listen for specific session
+socket.on('message', (data) => {
+  if (data.sessionId === 'mysession') {
+    console.log('Message received:', data.data.content);
+    
+    // Auto-reply example
+    if (data.data.content === 'ping') {
+      // Use REST API to send reply
+      fetch('http://localhost:3000/api/whatsapp/chats/send-text', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Api-Key': 'your_api_key'
+        },
+        body: JSON.stringify({
+          sessionId: 'mysession',
+          chatId: data.data.from,
+          message: 'pong!'
+        })
+      });
+    }
+  }
+});
+
+socket.on('connection.update', (data) => {
+  console.log(`Session ${data.sessionId} status: ${data.data.status}`);
+});
+```
+
+---
+
+## WebSocket Test Page
+
+For testing and debugging WebSocket events, open the interactive test page in your browser:
+
+```
+http://localhost:3000/ws-test
+```
+
+This page provides:
+- Real-time event viewer
+- Event filtering
+- Session subscription
+- Event details inspection
+
+---
+
+## WebSocket Stats
+
+Get statistics about active WebSocket connections:
+
+```http
+GET /api/websocket/stats
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "totalConnections": 5,
+    "connectedSessions": ["session1", "session2"],
+    "uptime": 3600
+  }
+}
+```

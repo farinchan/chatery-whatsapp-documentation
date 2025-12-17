@@ -1,0 +1,425 @@
+---
+title: Examples
+group: Advanced
+description: Code examples for integrating with Chatery WhatsApp API in various languages.
+priority: 8
+---
+
+## Overview
+
+This page provides code examples for integrating with Chatery WhatsApp API using various programming languages.
+
+---
+
+## Node.js Client
+
+```javascript
+const axios = require('axios');
+
+const API_URL = 'http://localhost:3000/api/whatsapp';
+const API_KEY = 'your_api_key_here';
+
+const client = axios.create({
+  baseURL: API_URL,
+  headers: {
+    'Content-Type': 'application/json',
+    'X-Api-Key': API_KEY
+  }
+});
+
+// Create session
+async function createSession(sessionId) {
+  const response = await client.post(`/sessions/${sessionId}/connect`);
+  return response.data;
+}
+
+// Get QR Code
+async function getQRCode(sessionId) {
+  const response = await client.get(`/sessions/${sessionId}/qr`);
+  return response.data;
+}
+
+// Send message
+async function sendMessage(sessionId, to, message) {
+  const response = await client.post('/chats/send-text', {
+    sessionId,
+    chatId: to,
+    message,
+    typingTime: 1000
+  });
+  return response.data;
+}
+
+// Send image
+async function sendImage(sessionId, to, imageUrl, caption) {
+  const response = await client.post('/chats/send-image', {
+    sessionId,
+    chatId: to,
+    imageUrl,
+    caption
+  });
+  return response.data;
+}
+
+// Get all groups
+async function getGroups(sessionId) {
+  const response = await client.post('/groups', { sessionId });
+  return response.data;
+}
+
+// Create group
+async function createGroup(sessionId, name, participants) {
+  const response = await client.post('/groups/create', {
+    sessionId,
+    name,
+    participants
+  });
+  return response.data;
+}
+
+// Example usage
+async function main() {
+  try {
+    // Create session
+    const session = await createSession('mysession');
+    console.log('Session created:', session);
+    
+    // Wait for QR code scan...
+    
+    // Send message
+    const result = await sendMessage('mysession', '628123456789', 'Hello from Node.js!');
+    console.log('Message sent:', result);
+    
+  } catch (error) {
+    console.error('Error:', error.response?.data || error.message);
+  }
+}
+
+main();
+```
+
+---
+
+## Python Client
+
+```python
+import requests
+
+API_URL = 'http://localhost:3000/api/whatsapp'
+API_KEY = 'your_api_key_here'
+
+headers = {
+    'Content-Type': 'application/json',
+    'X-Api-Key': API_KEY
+}
+
+# Create session
+def create_session(session_id):
+    response = requests.post(
+        f'{API_URL}/sessions/{session_id}/connect',
+        headers=headers
+    )
+    return response.json()
+
+# Send message
+def send_message(session_id, to, message):
+    response = requests.post(
+        f'{API_URL}/chats/send-text',
+        headers=headers,
+        json={
+            'sessionId': session_id,
+            'chatId': to,
+            'message': message,
+            'typingTime': 1000
+        }
+    )
+    return response.json()
+
+# Send image
+def send_image(session_id, to, image_url, caption=''):
+    response = requests.post(
+        f'{API_URL}/chats/send-image',
+        headers=headers,
+        json={
+            'sessionId': session_id,
+            'chatId': to,
+            'imageUrl': image_url,
+            'caption': caption
+        }
+    )
+    return response.json()
+
+# Get all groups
+def get_groups(session_id):
+    response = requests.post(
+        f'{API_URL}/groups',
+        headers=headers,
+        json={'sessionId': session_id}
+    )
+    return response.json()
+
+# Get chats overview
+def get_chats(session_id, limit=50):
+    response = requests.post(
+        f'{API_URL}/chats/overview',
+        headers=headers,
+        json={
+            'sessionId': session_id,
+            'limit': limit
+        }
+    )
+    return response.json()
+
+# Example usage
+if __name__ == '__main__':
+    # Create session
+    result = create_session('mysession')
+    print('Session created:', result)
+    
+    # Send message
+    result = send_message('mysession', '628123456789', 'Hello from Python!')
+    print('Message sent:', result)
+```
+
+---
+
+## PHP Client
+
+```php
+<?php
+
+class ChateryClient {
+    private $apiUrl;
+    private $apiKey;
+    
+    public function __construct($apiUrl = 'http://localhost:3000/api/whatsapp', $apiKey = '') {
+        $this->apiUrl = $apiUrl;
+        $this->apiKey = $apiKey;
+    }
+    
+    private function request($method, $endpoint, $data = null) {
+        $ch = curl_init();
+        
+        curl_setopt($ch, CURLOPT_URL, $this->apiUrl . $endpoint);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'X-Api-Key: ' . $this->apiKey
+        ]);
+        
+        if ($method === 'POST') {
+            curl_setopt($ch, CURLOPT_POST, true);
+            if ($data) {
+                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+            }
+        }
+        
+        $response = curl_exec($ch);
+        curl_close($ch);
+        
+        return json_decode($response, true);
+    }
+    
+    public function createSession($sessionId) {
+        return $this->request('POST', "/sessions/{$sessionId}/connect");
+    }
+    
+    public function sendMessage($sessionId, $to, $message) {
+        return $this->request('POST', '/chats/send-text', [
+            'sessionId' => $sessionId,
+            'chatId' => $to,
+            'message' => $message,
+            'typingTime' => 1000
+        ]);
+    }
+    
+    public function sendImage($sessionId, $to, $imageUrl, $caption = '') {
+        return $this->request('POST', '/chats/send-image', [
+            'sessionId' => $sessionId,
+            'chatId' => $to,
+            'imageUrl' => $imageUrl,
+            'caption' => $caption
+        ]);
+    }
+    
+    public function getGroups($sessionId) {
+        return $this->request('POST', '/groups', [
+            'sessionId' => $sessionId
+        ]);
+    }
+}
+
+// Usage
+$client = new ChateryClient('http://localhost:3000/api/whatsapp', 'your_api_key');
+
+// Create session
+$result = $client->createSession('mysession');
+print_r($result);
+
+// Send message
+$result = $client->sendMessage('mysession', '628123456789', 'Hello from PHP!');
+print_r($result);
+```
+
+---
+
+## cURL Examples
+
+### Create Session
+
+```bash
+curl -X POST http://localhost:3000/api/whatsapp/sessions/mysession/connect \
+  -H "X-Api-Key: your_api_key" \
+  -H "Content-Type: application/json"
+```
+
+### Send Text Message
+
+```bash
+curl -X POST http://localhost:3000/api/whatsapp/chats/send-text \
+  -H "X-Api-Key: your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "sessionId": "mysession",
+    "chatId": "628123456789",
+    "message": "Hello World!",
+    "typingTime": 2000
+  }'
+```
+
+### Send Image
+
+```bash
+curl -X POST http://localhost:3000/api/whatsapp/chats/send-image \
+  -H "X-Api-Key: your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "sessionId": "mysession",
+    "chatId": "628123456789",
+    "imageUrl": "https://example.com/image.jpg",
+    "caption": "Check this out!"
+  }'
+```
+
+### Send Document
+
+```bash
+curl -X POST http://localhost:3000/api/whatsapp/chats/send-document \
+  -H "X-Api-Key: your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "sessionId": "mysession",
+    "chatId": "628123456789",
+    "documentUrl": "https://example.com/file.pdf",
+    "filename": "document.pdf",
+    "mimetype": "application/pdf"
+  }'
+```
+
+### Create Group
+
+```bash
+curl -X POST http://localhost:3000/api/whatsapp/groups/create \
+  -H "X-Api-Key: your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "sessionId": "mysession",
+    "name": "My New Group",
+    "participants": ["628123456789", "628987654321"]
+  }'
+```
+
+---
+
+## WebSocket Client (JavaScript)
+
+```javascript
+const io = require('socket.io-client');
+
+const socket = io('http://localhost:3000');
+
+// Connection events
+socket.on('connect', () => {
+  console.log('Connected to WebSocket server');
+});
+
+socket.on('disconnect', () => {
+  console.log('Disconnected from WebSocket server');
+});
+
+// Listen for all events
+socket.onAny((eventName, ...args) => {
+  console.log(`[${new Date().toISOString()}] ${eventName}:`, JSON.stringify(args, null, 2));
+});
+
+// Listen for messages
+socket.on('message', (data) => {
+  const { sessionId, data: messageData } = data;
+  
+  console.log(`[${sessionId}] New message from ${messageData.from}:`);
+  console.log(`  Type: ${messageData.type}`);
+  console.log(`  Content: ${messageData.content}`);
+  
+  // Auto-reply example
+  if (messageData.content?.toLowerCase() === 'hello') {
+    fetch('http://localhost:3000/api/whatsapp/chats/send-text', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Api-Key': 'your_api_key'
+      },
+      body: JSON.stringify({
+        sessionId,
+        chatId: messageData.from,
+        message: 'Hello! How can I help you?',
+        typingTime: 1000
+      })
+    });
+  }
+});
+
+// Listen for connection updates
+socket.on('connection.update', (data) => {
+  console.log(`[${data.sessionId}] Connection status: ${data.data.status}`);
+});
+
+// Keep the script running
+console.log('Listening for WhatsApp events...');
+```
+
+---
+
+## Error Handling
+
+All API responses follow this format:
+
+### Success Response
+
+```json
+{
+  "success": true,
+  "message": "Operation completed",
+  "data": { ... }
+}
+```
+
+### Error Response
+
+```json
+{
+  "success": false,
+  "error": "Error message",
+  "code": "ERROR_CODE"
+}
+```
+
+### Common HTTP Status Codes
+
+| Status | Description |
+|--------|-------------|
+| 200 | Success |
+| 400 | Bad Request - Invalid parameters |
+| 401 | Unauthorized - Missing API key |
+| 403 | Forbidden - Invalid API key |
+| 404 | Not Found - Session or resource not found |
+| 500 | Internal Server Error |

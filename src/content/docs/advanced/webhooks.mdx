@@ -1,0 +1,251 @@
+---
+title: Webhooks
+group: Advanced
+description: Configure webhooks to receive event notifications on your server.
+priority: 9
+---
+
+## Overview
+
+Webhooks allow you to receive real-time notifications about WhatsApp events on your own server. You can configure multiple webhook URLs per session, each subscribing to specific events.
+
+---
+
+## Setup Multiple Webhooks
+
+### During Session Creation
+
+```bash
+curl -X POST http://localhost:3000/api/whatsapp/sessions/mysession/connect \
+  -H "Content-Type: application/json" \
+  -H "X-Api-Key: your_api_key" \
+  -d '{
+    "webhooks": [
+      { "url": "https://your-server.com/webhook", "events": ["all"] },
+      { "url": "https://backup.com/webhook", "events": ["message"] }
+    ]
+  }'
+```
+
+### Add Webhook to Existing Session
+
+```http
+POST /sessions/:sessionId/webhooks
+```
+
+**Body:**
+```json
+{
+  "url": "https://new-server.com/webhook",
+  "events": ["message", "connection.update"]
+}
+```
+
+### Remove Webhook
+
+```http
+DELETE /sessions/:sessionId/webhooks
+```
+
+**Body:**
+```json
+{
+  "url": "https://old-server.com/webhook"
+}
+```
+
+---
+
+## Webhook Payload
+
+All webhook requests are sent as `POST` with JSON body:
+
+```json
+{
+  "sessionId": "mysession",
+  "type": "message",
+  "timestamp": 1609459200,
+  "data": {
+    // Event-specific data
+  }
+}
+```
+
+---
+
+## Webhook Headers
+
+Each webhook request includes these headers:
+
+| Header | Description |
+|--------|-------------|
+| `Content-Type` | `application/json` |
+| `X-Chatery-Signature` | HMAC signature for verification (if configured) |
+| `X-Chatery-Event` | Event type (e.g., `message`, `connection.update`) |
+| `X-Chatery-Session` | Session ID |
+
+---
+
+## Available Webhook Events
+
+### Message Events
+
+| Event | Description |
+|-------|-------------|
+| `message` | New message received |
+| `message.sent` | Message was sent |
+| `message.update` | Message status updated |
+| `message.delete` | Message was deleted |
+| `message.reaction` | Message reaction added/removed |
+
+### Connection Events
+
+| Event | Description |
+|-------|-------------|
+| `connection.update` | Session connection status changed |
+| `qr.update` | New QR code generated |
+| `session.ready` | Session fully connected |
+| `session.disconnected` | Session disconnected |
+
+### Group Events
+
+| Event | Description |
+|-------|-------------|
+| `group.update` | Group info updated |
+| `group.participants.update` | Participants added/removed |
+
+### Special Events
+
+| Event | Description |
+|-------|-------------|
+| `all` | Subscribe to all events |
+
+---
+
+## Webhook Event Payloads
+
+### Message Event
+
+```json
+{
+  "sessionId": "mysession",
+  "type": "message",
+  "timestamp": 1609459200,
+  "data": {
+    "id": "ABCD1234567890",
+    "from": "628123456789@s.whatsapp.net",
+    "to": "628987654321@s.whatsapp.net",
+    "type": "text",
+    "content": "Hello World!",
+    "pushName": "John Doe",
+    "isGroup": false,
+    "groupId": null
+  }
+}
+```
+
+### Connection Update Event
+
+```json
+{
+  "sessionId": "mysession",
+  "type": "connection.update",
+  "timestamp": 1609459200,
+  "data": {
+    "status": "connected",
+    "phoneNumber": "628123456789",
+    "name": "John Doe"
+  }
+}
+```
+
+### Group Participants Update
+
+```json
+{
+  "sessionId": "mysession",
+  "type": "group.participants.update",
+  "timestamp": 1609459200,
+  "data": {
+    "groupId": "123456789@g.us",
+    "action": "add",
+    "participants": ["628111222333@s.whatsapp.net"],
+    "by": "628123456789@s.whatsapp.net"
+  }
+}
+```
+
+---
+
+## Webhook Best Practices
+
+1. **Respond Quickly** - Return a 2xx status code within 5 seconds
+2. **Handle Retries** - Implement idempotency for duplicate events
+3. **Verify Signature** - Validate the `X-Chatery-Signature` header
+4. **Use HTTPS** - Always use secure endpoints in production
+5. **Queue Processing** - Process events asynchronously if heavy processing is needed
+
+---
+
+## Example Webhook Server
+
+### Node.js/Express
+
+```javascript
+const express = require('express');
+const app = express();
+
+app.use(express.json());
+
+app.post('/webhook', (req, res) => {
+  const { sessionId, type, data } = req.body;
+  
+  console.log(`[${sessionId}] Event: ${type}`);
+  
+  switch (type) {
+    case 'message':
+      console.log(`New message from ${data.from}: ${data.content}`);
+      break;
+    case 'connection.update':
+      console.log(`Connection status: ${data.status}`);
+      break;
+    default:
+      console.log('Event data:', data);
+  }
+  
+  // Always respond with 200 OK
+  res.status(200).json({ received: true });
+});
+
+app.listen(3001, () => {
+  console.log('Webhook server running on port 3001');
+});
+```
+
+### Python/Flask
+
+```python
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+@app.route('/webhook', methods=['POST'])
+def webhook():
+    data = request.json
+    
+    session_id = data.get('sessionId')
+    event_type = data.get('type')
+    event_data = data.get('data')
+    
+    print(f"[{session_id}] Event: {event_type}")
+    
+    if event_type == 'message':
+        print(f"New message from {event_data['from']}: {event_data['content']}")
+    elif event_type == 'connection.update':
+        print(f"Connection status: {event_data['status']}")
+    
+    return jsonify({'received': True}), 200
+
+if __name__ == '__main__':
+    app.run(port=3001)
+```

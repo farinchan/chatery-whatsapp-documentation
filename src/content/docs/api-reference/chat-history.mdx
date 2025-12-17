@@ -1,0 +1,155 @@
+---
+title: Chat History
+group: API Reference
+description: Access chat history, contacts, messages, and manage read status.
+priority: 8
+---
+
+## Overview
+
+Chat History API allows you to access and manage chat history, contacts, and messages from your WhatsApp sessions.
+
+**Base URL:** `http://localhost:3000/api/whatsapp`
+
+---
+
+## Get Chats Overview
+
+Get an overview of all chats with pagination and filtering.
+
+```http
+POST /chats/overview
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "limit": 50,
+  "offset": 0,
+  "type": "all"
+}
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `sessionId` | string | Required. Session ID |
+| `limit` | number | Optional. Max results (default: 50) |
+| `offset` | number | Optional. Pagination offset (default: 0) |
+| `type` | string | Optional. Filter: `all`, `personal`, `group` |
+
+---
+
+## Get Contacts
+
+Get a list of contacts with search capability.
+
+```http
+POST /contacts
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "limit": 100,
+  "offset": 0,
+  "search": "john"
+}
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `sessionId` | string | Required. Session ID |
+| `limit` | number | Optional. Max results (default: 100) |
+| `offset` | number | Optional. Pagination offset (default: 0) |
+| `search` | string | Optional. Search query for contact name |
+
+---
+
+## Get Chat Messages
+
+Get messages from a specific chat with cursor-based pagination.
+
+```http
+POST /chats/messages
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "chatId": "628123456789@s.whatsapp.net",
+  "limit": 50,
+  "cursor": null
+}
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `sessionId` | string | Required. Session ID |
+| `chatId` | string | Required. Chat ID (phone@s.whatsapp.net or group@g.us) |
+| `limit` | number | Optional. Max messages (default: 50) |
+| `cursor` | string | Optional. Pagination cursor for next page |
+
+---
+
+## Get Chat Info
+
+Get detailed information about a specific chat.
+
+```http
+POST /chats/info
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "chatId": "628123456789@s.whatsapp.net"
+}
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `sessionId` | string | Required. Session ID |
+| `chatId` | string | Required. Chat ID |
+
+---
+
+## Mark Chat as Read
+
+Mark messages in a chat as read.
+
+```http
+POST /chats/mark-read
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "chatId": "628123456789",
+  "messageId": null
+}
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `sessionId` | string | Required. Session ID |
+| `chatId` | string | Required. Phone number or group ID |
+| `messageId` | string | Optional. Specific message ID to mark as read |
+
+---
+
+## Chat ID Formats
+
+Understanding chat ID formats:
+
+| Type | Format | Example |
+|------|--------|---------|
+| Personal Chat | `{phone}@s.whatsapp.net` | `628123456789@s.whatsapp.net` |
+| Group Chat | `{id}@g.us` | `123456789012345678@g.us` |
+| Broadcast List | `{id}@broadcast` | `status@broadcast` |
+
+> **Tip:** When sending messages, you can use just the phone number (e.g., `628123456789`) and the API will automatically add the appropriate suffix.

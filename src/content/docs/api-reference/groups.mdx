@@ -1,0 +1,352 @@
+---
+title: Group Management
+group: API Reference
+description: Create and manage WhatsApp groups - participants, settings, and invitations.
+priority: 7
+---
+
+## Overview
+
+Group Management API allows you to create, manage, and control WhatsApp groups programmatically.
+
+**Base URL:** `http://localhost:3000/api/whatsapp`
+
+---
+
+## Get All Groups
+
+Get a list of all groups the session is part of.
+
+```http
+POST /groups
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "count": 5,
+    "groups": [
+      {
+        "id": "123456789@g.us",
+        "subject": "My Group",
+        "participantsCount": 25,
+        "creation": 1609459200
+      }
+    ]
+  }
+}
+```
+
+---
+
+## Create Group
+
+Create a new WhatsApp group.
+
+```http
+POST /groups/create
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "name": "My New Group",
+  "participants": ["628123456789", "628987654321"]
+}
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `sessionId` | string | Required. Session ID |
+| `name` | string | Required. Group name |
+| `participants` | array | Required. Array of phone numbers to add |
+
+---
+
+## Get Group Metadata
+
+Get detailed metadata about a group.
+
+```http
+POST /groups/metadata
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "groupId": "123456789@g.us"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "123456789@g.us",
+    "subject": "My Group",
+    "description": "Group description",
+    "participants": [
+      { "id": "628123456789@s.whatsapp.net", "admin": "superadmin" },
+      { "id": "628987654321@s.whatsapp.net", "admin": null }
+    ],
+    "size": 25
+  }
+}
+```
+
+---
+
+## Participant Management
+
+### Add Participants
+
+Add new members to a group.
+
+```http
+POST /groups/participants/add
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "groupId": "123456789@g.us",
+  "participants": ["628111222333", "628444555666"]
+}
+```
+
+### Remove Participants
+
+Remove members from a group.
+
+```http
+POST /groups/participants/remove
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "groupId": "123456789@g.us",
+  "participants": ["628111222333"]
+}
+```
+
+### Promote to Admin
+
+Promote participants to group admin.
+
+```http
+POST /groups/participants/promote
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "groupId": "123456789@g.us",
+  "participants": ["628111222333"]
+}
+```
+
+### Demote from Admin
+
+Demote admins to regular participants.
+
+```http
+POST /groups/participants/demote
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "groupId": "123456789@g.us",
+  "participants": ["628111222333"]
+}
+```
+
+---
+
+## Group Settings
+
+### Update Group Subject (Name)
+
+Change the group name.
+
+```http
+POST /groups/subject
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "groupId": "123456789@g.us",
+  "subject": "New Group Name"
+}
+```
+
+### Update Group Description
+
+Change the group description.
+
+```http
+POST /groups/description
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "groupId": "123456789@g.us",
+  "description": "This is the new group description"
+}
+```
+
+### Update Group Settings
+
+Change group messaging and editing permissions.
+
+```http
+POST /groups/settings
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "groupId": "123456789@g.us",
+  "setting": "announcement"
+}
+```
+
+| Setting | Description |
+|---------|-------------|
+| `announcement` | Only admins can send messages |
+| `not_announcement` | All participants can send messages |
+| `locked` | Only admins can edit group info |
+| `unlocked` | All participants can edit group info |
+
+### Update Group Picture
+
+Change the group profile picture.
+
+```http
+POST /groups/picture
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "groupId": "123456789@g.us",
+  "imageUrl": "https://example.com/group-pic.jpg"
+}
+```
+
+---
+
+## Group Membership
+
+### Leave Group
+
+Leave a group.
+
+```http
+POST /groups/leave
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "groupId": "123456789@g.us"
+}
+```
+
+### Join Group via Invite
+
+Join a group using an invite link.
+
+```http
+POST /groups/join
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "inviteCode": "https://chat.whatsapp.com/AbCdEfGhIjKlMn"
+}
+```
+
+---
+
+## Invite Links
+
+### Get Invite Code
+
+Get the group's invite link.
+
+```http
+POST /groups/invite-code
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "groupId": "123456789@g.us"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "groupId": "123456789@g.us",
+    "inviteCode": "AbCdEfGhIjKlMn",
+    "inviteLink": "https://chat.whatsapp.com/AbCdEfGhIjKlMn"
+  }
+}
+```
+
+### Revoke Invite Code
+
+Revoke the current invite link and generate a new one.
+
+```http
+POST /groups/revoke-invite
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "groupId": "123456789@g.us"
+}
+```
+
+---
+
+## Admin Roles
+
+| Role | Description |
+|------|-------------|
+| `superadmin` | Group creator, cannot be demoted |
+| `admin` | Promoted admin, can be demoted |
+| `null` | Regular participant |

@@ -1,0 +1,118 @@
+---
+title: App Integrations
+group: Integrations
+description: Integrate Chatery WhatsApp API with popular automation and development platforms.
+priority: 11
+---
+
+import { Card, CardGrid } from '@components/mdx';
+
+## Overview
+
+Chatery WhatsApp API can be integrated with various platforms and tools to create powerful automation workflows. This section covers available integrations and how to use them.
+
+## Available Integrations
+
+<CardGrid>
+	<Card title="n8n Integration" icon="blocks" gradient="blue">
+		Automate WhatsApp messaging with n8n workflow automation platform. Send messages, manage sessions, and handle groups directly from your n8n workflows.
+	</Card>
+	<Card title="Coming Soon" icon="sparkles" gradient="purple">
+		More integrations coming soon! We're working on Zapier, Make (Integromat), and other platforms.
+	</Card>
+</CardGrid>
+
+---
+
+## n8n Community Node
+
+**n8n-nodes-chatery-whatsapp** is an **n8n community node** that provides full integration with Chatery WhatsApp API.
+
+> 🧩 **Community Node**: This integration is community-contributed and maintained by the Chatery developer.
+
+### Features
+
+- ✅ **Trigger Node** - Listen for WhatsApp events (messages, connection updates, etc.)
+- ✅ **Action Node** - Send messages, manage sessions, groups, and more
+- ✅ **Full API Coverage** - All Chatery API endpoints available
+- ✅ **Easy Setup** - Simple credentials configuration
+
+### Quick Install
+
+```bash
+npm install n8n-nodes-chatery-whatsapp
+```
+
+Or install via n8n Community Nodes interface.
+
+[📖 Read Full n8n Community Node Documentation →](/integrations/n8n)
+
+---
+
+## Integration Methods
+
+If you need to integrate with platforms that don't have a dedicated integration, you can use:
+
+### 1. REST API
+
+Chatery provides a full REST API that can be used with any HTTP client or platform that supports HTTP requests.
+
+```http
+POST /api/whatsapp/chats/send-text
+Content-Type: application/json
+X-Api-Key: your_api_key
+
+{
+  "sessionId": "mysession",
+  "chatId": "628123456789",
+  "message": "Hello from your app!"
+}
+```
+
+### 2. Webhooks
+
+Configure webhooks to receive real-time events and trigger actions in your application:
+
+```json
+{
+  "url": "https://your-app.com/webhook",
+  "events": ["message", "connection.update"]
+}
+```
+
+### 3. WebSocket
+
+For real-time bidirectional communication:
+
+```javascript
+const socket = io('http://localhost:3000');
+
+socket.on('message', (data) => {
+  console.log('New message:', data);
+});
+```
+
+---
+
+## Integration Ideas
+
+Here are some popular use cases for Chatery integrations:
+
+| Use Case | Description |
+|----------|-------------|
+| **Customer Support Bot** | Auto-reply to customer messages using AI or predefined responses |
+| **Order Notifications** | Send order confirmations and shipping updates |
+| **Appointment Reminders** | Send automated reminders before appointments |
+| **Lead Collection** | Collect leads from WhatsApp and sync to CRM |
+| **Team Alerts** | Send alerts to team groups when events occur |
+| **Broadcast Messages** | Send marketing messages to multiple contacts |
+
+---
+
+## Need a Custom Integration?
+
+If you need help integrating Chatery with your specific platform or use case:
+
+1. Check our [API Reference](/api-reference/sessions) for endpoint details
+2. Review the [Examples](/advanced/examples) for code samples
+3. Open an issue on [GitHub](https://github.com/farinchan/chatery_whatsapp)

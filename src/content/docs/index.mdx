@@ -1,0 +1,74 @@
+---
+title: Chatery WhatsApp API
+group: Overview
+description: A powerful WhatsApp API backend built with Express.js and Baileys library for multi-session management, real-time WebSocket events, and more.
+priority: 10
+---
+
+import { Card, CardGrid } from '@components/mdx';
+
+<div class="hero">
+	<div class="hero-content">
+		<p class="max-w-2xl text-xl text-[#666687] dark:text-gray-400">
+			A powerful WhatsApp API backend built with Express.js and Baileys library. Supports multi-session management, real-time WebSocket events, group management, and media handling.
+		</p>
+	</div>
+</div>
+
+## ✨ Features
+
+<CardGrid>
+	<Card title="Multi-Session Support" icon="blocks" gradient="blue">
+		Manage multiple WhatsApp accounts simultaneously with independent session handling.
+	</Card>
+	<Card title="Real-time WebSocket" icon="sparkles" gradient="purple">
+		Get instant notifications for messages, status updates, and more via WebSocket.
+	</Card>
+	<Card title="Group Management" icon="brush" gradient="orange">
+		Create, manage, and control WhatsApp groups with full participant management.
+	</Card>
+	<Card title="Send Messages" icon="download" gradient="green">
+		Send text, images, documents, locations, contacts, and button messages.
+	</Card>
+</CardGrid>
+
+## Key Capabilities
+
+- 📱 **Multi-Session Support** - Manage multiple WhatsApp accounts simultaneously
+- 🔌 **Real-time WebSocket** - Get instant notifications for messages, status updates, and more
+- 👥 **Group Management** - Create, manage, and control WhatsApp groups
+- 📨 **Send Messages** - Text, images, documents, locations, contacts, and buttons
+- 📥 **Auto-Save Media** - Automatically save incoming media to server
+- 💾 **Persistent Store** - Message history with optimized caching
+- 🔐 **Session Persistence** - Sessions survive server restarts
+- 🎛️ **Admin Dashboard** - Web-based dashboard with real-time monitoring and API tester
+
+## Tech Stack
+
+| Technology | Version | Description |
+|------------|---------|-------------|
+| Node.js | 18+ | JavaScript runtime |
+| Express.js | 5.x | Web framework |
+| Baileys | 7.x | WhatsApp Web API library |
+| Socket.IO | 4.x | Real-time communication |
+
+## Quick Links
+
+| Resource | URL |
+|----------|-----|
+| 🎛️ Dashboard | `http://localhost:3000/dashboard` |
+| 📚 API Base URL | `http://localhost:3000/api/whatsapp` |
+| 🔌 WebSocket Test | `http://localhost:3000/ws-test` |
+| 📊 WebSocket Stats | `http://localhost:3000/api/websocket/stats` |
+| ❤️ Health Check | `http://localhost:3000/api/health` |
+
+## License
+
+This project is licensed under the ISC License.
+
+## Author
+
+**Fajri Rinaldi Chan** (Farin Chan)
+
+- GitHub: [@farinchan](https://github.com/farinchan)
+- LinkedIn: [farinchan](https://www.linkedin.com/in/fajri-chan)
