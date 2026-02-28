@@ -15,6 +15,50 @@ import { Card, CardGrid } from '@components/mdx';
 	</div>
 </div>
 
+
+<a href="https://sumopod.com" target="_blank" rel="noopener noreferrer" class="block no-underline rounded-xl border border-[#EDEDF0] dark:border-neutral-700 bg-gradient-to-r from-purple-50 to-green-50 dark:from-purple-950/30 dark:to-green-950/30 p-6 transition-all hover:shadow-lg hover:border-purple-300 dark:hover:border-purple-700">
+  <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-4">
+    <img src="/sumopod.png" alt="Sumopod" class="h-12" />
+    <div>
+      <span class="inline-block text-xs font-semibold uppercase tracking-wider text-purple-600 dark:text-purple-400 mb-1">Sponsor</span>
+      <p class="text-lg font-bold text-[#19191C] dark:text-white m-0">SumoPod — Container & Application Management</p>
+    </div>
+  </div>
+  <p class="text-sm text-[#666687] dark:text-gray-400 m-0 mb-3">SumoPod offers comprehensive solutions for container and application management</p>
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+    <div class="rounded-lg bg-white/70 dark:bg-neutral-800/50 p-3">
+      <p class="text-lg font-semibold text-[#19191C] dark:text-white m-0">Container Marketplace</p>
+      <p class="text-xs text-[#666687] dark:text-gray-400 m-0 mt-1">Explore and purchase from an extensive container library, all verified and ready for instant deployment.</p>
+    </div>
+    <div class="rounded-lg bg-white/70 dark:bg-neutral-800/50 p-3">
+      <p class="text-lg font-semibold text-[#19191C] dark:text-white m-0">One-Click Deployment</p>
+      <p class="text-xs text-[#666687] dark:text-gray-400 m-0 mt-1">Deploy containers to your infrastructure with one click, eliminating complex configuration processes.</p>
+    </div>
+    <div class="rounded-lg bg-white/70 dark:bg-neutral-800/50 p-3">
+      <p class="text-lg font-semibold text-[#19191C] dark:text-white m-0">Automatic Updates</p>
+      <p class="text-xs text-[#666687] dark:text-gray-400 m-0 mt-1">Keep your containers and applications up to date with automatic version updates and security patches.</p>
+    </div>
+  </div>
+</a>
+
+<a href="https://sumopod.com" target="_blank" rel="noopener noreferrer" class="block no-underline rounded-xl border border-emerald-200 dark:border-emerald-800 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 p-5 mt-4 transition-all hover:shadow-lg hover:border-emerald-400 dark:hover:border-emerald-600">
+  <div class="flex flex-col sm:flex-row items-center gap-4">
+    <div class="flex-shrink-0 flex items-center justify-center w-14 h-14 rounded-xl bg-emerald-100 dark:bg-emerald-900/50">
+      <img src="/logo.svg" alt="Chatery" class="w-10 h-10" />
+    </div>
+    <div class="flex-1 text-center sm:text-left">
+      <span class="inline-block text-[10px] font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/50 px-2 py-0.5 rounded-full mb-1">Available on SumoPod</span>
+      <p class="text-base font-bold text-[#19191C] dark:text-white m-0">Deploy Chatery WhatsApp API Instantly on SumoPod</p>
+	<p class="text-xs text-[#666687] dark:text-gray-400 m-0 mt-1">Get Chatery WhatsApp API ready to use on SumoPod — deploy with one click, without complex configuration. Includes auto-updates and monitoring.</p>
+    </div>
+    <div class="flex-shrink-0">
+      <span class="inline-flex items-center gap-1 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white">Get it now →</span>
+    </div>
+  </div>
+</a>
+
+> Want to support this project? Visit the [Sponsorship](/sponsorship) page for more information.
+
 ## ✨ Features
 
 <CardGrid>
@@ -37,11 +81,15 @@ import { Card, CardGrid } from '@components/mdx';
 - 📱 **Multi-Session Support** - Manage multiple WhatsApp accounts simultaneously
 - 🔌 **Real-time WebSocket** - Get instant notifications for messages, status updates, and more
 - 👥 **Group Management** - Create, manage, and control WhatsApp groups
-- 📨 **Send Messages** - Text, images, documents, locations, contacts, and buttons
+- 📨 **Send Messages** - Text, images, documents, locations, contacts, and more
+- ↩️ **Reply to Messages** - Reply/quote specific messages with `replyTo` parameter
+- 📊 **Poll Messages** - Send interactive polls with single or multiple choice
+- 📤 **Bulk Messaging** - Send messages to multiple recipients with background processing
 - 📥 **Auto-Save Media** - Automatically save incoming media to server
 - 💾 **Persistent Store** - Message history with optimized caching
 - 🔐 **Session Persistence** - Sessions survive server restarts
 - 🎛️ **Admin Dashboard** - Web-based dashboard with real-time monitoring and API tester
+- 📄 **Swagger UI** - Interactive API documentation at root URL
 
 ## Tech Stack
 
@@ -56,11 +104,13 @@ import { Card, CardGrid } from '@components/mdx';
 
 | Resource | URL |
 |----------|-----|
+| 📄 Swagger UI (API Docs) | `http://localhost:3000` |
 | 🎛️ Dashboard | `http://localhost:3000/dashboard` |
 | 📚 API Base URL | `http://localhost:3000/api/whatsapp` |
 | 🔌 WebSocket Test | `http://localhost:3000/ws-test` |
 | 📊 WebSocket Stats | `http://localhost:3000/api/websocket/stats` |
 | ❤️ Health Check | `http://localhost:3000/api/health` |
+| 📋 OpenAPI JSON | `http://localhost:3000/api-docs.json` |
 
 ## License
 
@@ -71,4 +121,6 @@ This project is licensed under the MIT License.
 **Fajri Rinaldi Chan** (Farin Chan)
 
 - GitHub: [@farinchan](https://github.com/farinchan)
-- LinkedIn: [fajri-chan](https://www.linkedin.com/in/fajri-chan)
+- LinkedIn: [Fajri Chan](https://www.linkedin.com/in/fajri-chan)
+- Instagram: [@fajri_chan](https://www.instagram.com/fajri_chan)
+

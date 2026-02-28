@@ -18,52 +18,40 @@ Chatery WhatsApp API provides real-time WebSocket support for receiving instant 
 Connect to the WebSocket server using Socket.IO client:
 
 ```javascript
+import { io } from 'socket.io-client';
+
 const socket = io('http://localhost:3000');
 
-socket.on('connect', () => {
-  console.log('Connected to WebSocket');
-});
+// Subscribe to a session
+socket.emit('subscribe', 'mysession');
 
-socket.on('disconnect', () => {
-  console.log('Disconnected from WebSocket');
-});
+// Unsubscribe from a session
+socket.emit('unsubscribe', 'mysession');
 ```
 
 ---
 
 ## Events
 
-### Connection Events
-
-| Event | Description |
-|-------|-------------|
-| `connection.update` | Session connection status changed |
-| `qr.update` | New QR code generated |
-| `session.ready` | Session is fully connected and ready |
-| `session.disconnected` | Session was disconnected |
-
-### Message Events
-
-| Event | Description |
-|-------|-------------|
-| `message` | New message received |
-| `message.sent` | Message was sent successfully |
-| `message.update` | Message status updated (delivered, read, etc.) |
-| `message.delete` | Message was deleted |
-| `message.reaction` | Message reaction added/removed |
-
-### Presence Events
-
-| Event | Description |
-|-------|-------------|
-| `presence.update` | Contact presence changed (online, typing, etc.) |
-
-### Group Events
-
-| Event | Description |
-|-------|-------------|
-| `group.update` | Group info updated |
-| `group.participants.update` | Group participants changed |
+| Event | Description | Payload |
+|-------|-------------|--------|
+| `qr` | QR code generated | `{ sessionId, qrCode, timestamp }` |
+| `connection.update` | Connection status changed | `{ sessionId, status, phoneNumber?, name?, timestamp }` |
+| `message` | New message received | `{ sessionId, message, timestamp }` |
+| `message.sent` | Message sent confirmation | `{ sessionId, message, timestamp }` |
+| `message.update` | Message status update (read, delivered) | `{ sessionId, update, timestamp }` |
+| `message.reaction` | Message reaction added | `{ sessionId, reactions, timestamp }` |
+| `message.revoke` | Message deleted/revoked | `{ sessionId, key, participant, timestamp }` |
+| `chat.update` | Chat updated | `{ sessionId, chats, timestamp }` |
+| `chat.upsert` | New chat created | `{ sessionId, chats, timestamp }` |
+| `chat.delete` | Chat deleted | `{ sessionId, chatIds, timestamp }` |
+| `contact.update` | Contact updated | `{ sessionId, contacts, timestamp }` |
+| `presence.update` | Typing, online status | `{ sessionId, presence, timestamp }` |
+| `group.participants` | Group members changed | `{ sessionId, update, timestamp }` |
+| `group.update` | Group info changed | `{ sessionId, update, timestamp }` |
+| `call` | Incoming call | `{ sessionId, call, timestamp }` |
+| `labels` | Labels updated (business) | `{ sessionId, labels, timestamp }` |
+| `logged.out` | Session logged out | `{ sessionId, message, timestamp }` |
 
 ---
 
@@ -129,41 +117,37 @@ socket.on('group.participants.update', (data) => {
 ## Example: Listen for Messages
 
 ```javascript
-const io = require('socket.io-client');
-
 const socket = io('http://localhost:3000');
 
-// Listen for all events
-socket.onAny((eventName, ...args) => {
-  console.log(`Event: ${eventName}`, args);
+socket.on('connect', () => {
+  console.log('Connected to WebSocket');
+  socket.emit('subscribe', 'mysession');
 });
 
-// Listen for specific session
 socket.on('message', (data) => {
-  if (data.sessionId === 'mysession') {
-    console.log('Message received:', data.data.content);
-    
-    // Auto-reply example
-    if (data.data.content === 'ping') {
-      // Use REST API to send reply
-      fetch('http://localhost:3000/api/whatsapp/chats/send-text', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Api-Key': 'your_api_key'
-        },
-        body: JSON.stringify({
-          sessionId: 'mysession',
-          chatId: data.data.from,
-          message: 'pong!'
-        })
-      });
-    }
-  }
+  console.log('New message:', data.message);
+  // {
+  //   sessionId: 'mysession',
+  //   message: {
+  //     id: 'ABC123',
+  //     from: '628123456789@s.whatsapp.net',
+  //     text: 'Hello!',
+  //     timestamp: 1234567890,
+  //     ...
+  //   },
+  //   timestamp: '2024-01-15T10:30:00.000Z'
+  // }
+});
+
+socket.on('qr', (data) => {
+  console.log('Scan QR Code:', data.qrCode);
 });
 
 socket.on('connection.update', (data) => {
-  console.log(`Session ${data.sessionId} status: ${data.data.status}`);
+  console.log('Connection status:', data.status);
+  if (data.status === 'connected') {
+    console.log(`Connected as ${data.name} (${data.phoneNumber})`);
+  }
 });
 ```
 
@@ -199,8 +183,10 @@ GET /api/websocket/stats
   "success": true,
   "data": {
     "totalConnections": 5,
-    "connectedSessions": ["session1", "session2"],
-    "uptime": 3600
+    "sessionRooms": {
+      "mysession": 2,
+      "othersession": 1
+    }
   }
 }
 ```

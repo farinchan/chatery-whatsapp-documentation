@@ -1,0 +1,207 @@
+---
+title: Bulk Messaging
+group: API Reference
+description: Send messages to multiple recipients with background processing and job tracking.
+priority: 8.5
+---
+
+## Overview
+
+Bulk messaging runs in the background and returns immediately with a job ID. You can track progress using the status endpoint.
+
+> ⚡ **Background Processing:** All bulk endpoints return immediately with a `jobId`. Messages are sent in background to avoid request timeouts. Track progress with the status endpoint.
+
+**Base URL:** `http://localhost:3000/api/whatsapp`
+
+---
+
+## Send Bulk Text Message
+
+Send a text message to multiple recipients.
+
+```http
+POST /chats/send-bulk
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "recipients": ["628123456789", "628987654321", "628111222333"],
+  "message": "Hello! This is a bulk message.",
+  "delayBetweenMessages": 1000,
+  "typingTime": 0
+}
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `sessionId` | string | Required. Session ID |
+| `recipients` | array | Required. Array of phone numbers (max 100) |
+| `message` | string | Required. Text message to send |
+| `delayBetweenMessages` | number | Optional. Delay between messages in ms (default: 1000) |
+| `typingTime` | number | Optional. Typing indicator duration in ms (default: 0) |
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Bulk message job started. Check status with jobId.",
+  "data": {
+    "jobId": "bulk_1704326400000_abc123def",
+    "total": 3,
+    "statusUrl": "/api/whatsapp/chats/bulk-status/bulk_1704326400000_abc123def"
+  }
+}
+```
+
+---
+
+## Send Bulk Image
+
+Send an image to multiple recipients.
+
+```http
+POST /chats/send-bulk-image
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "recipients": ["628123456789", "628987654321"],
+  "imageUrl": "https://example.com/image.jpg",
+  "caption": "Check out this image!",
+  "delayBetweenMessages": 1000,
+  "typingTime": 0
+}
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `sessionId` | string | Required. Session ID |
+| `recipients` | array | Required. Array of phone numbers (max 100) |
+| `imageUrl` | string | Required. Direct URL to image file |
+| `caption` | string | Optional. Image caption |
+| `delayBetweenMessages` | number | Optional. Delay between messages in ms (default: 1000) |
+| `typingTime` | number | Optional. Typing indicator duration in ms (default: 0) |
+
+---
+
+## Send Bulk Document
+
+Send a document to multiple recipients.
+
+```http
+POST /chats/send-bulk-document
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "recipients": ["628123456789", "628987654321"],
+  "documentUrl": "https://example.com/document.pdf",
+  "filename": "document.pdf",
+  "mimetype": "application/pdf",
+  "delayBetweenMessages": 1000,
+  "typingTime": 0
+}
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `sessionId` | string | Required. Session ID |
+| `recipients` | array | Required. Array of phone numbers (max 100) |
+| `documentUrl` | string | Required. Direct URL to document |
+| `filename` | string | Required. Filename to display |
+| `mimetype` | string | Optional. MIME type (default: application/pdf) |
+| `delayBetweenMessages` | number | Optional. Delay between messages in ms (default: 1000) |
+| `typingTime` | number | Optional. Typing indicator duration in ms (default: 0) |
+
+---
+
+## Get Bulk Job Status
+
+Check the progress of a bulk messaging job.
+
+```http
+GET /chats/bulk-status/:jobId
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "sessionId": "mysession",
+    "type": "text",
+    "status": "processing",
+    "total": 50,
+    "sent": 25,
+    "failed": 2,
+    "progress": 54,
+    "details": [
+      {
+        "recipient": "628123456789",
+        "status": "sent",
+        "messageId": "ABC123",
+        "timestamp": "2026-01-04T10:00:00.000Z"
+      },
+      {
+        "recipient": "628987654321",
+        "status": "failed",
+        "error": "Number not registered",
+        "timestamp": "2026-01-04T10:00:01.000Z"
+      }
+    ],
+    "createdAt": "2026-01-04T10:00:00.000Z",
+    "completedAt": null
+  }
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `status` | string | `processing` or `completed` |
+| `progress` | number | Progress percentage (0-100) |
+| `sent` | number | Successfully sent count |
+| `failed` | number | Failed count |
+| `details` | array | Per-recipient status with timestamps |
+
+---
+
+## Get All Bulk Jobs
+
+Get all bulk messaging jobs for a session.
+
+```http
+POST /chats/bulk-jobs
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "jobId": "bulk_1704326400000_abc123def",
+      "type": "text",
+      "status": "completed",
+      "total": 50,
+      "sent": 48,
+      "failed": 2,
+      "progress": 100,
+      "createdAt": "2026-01-04T10:00:00.000Z",
+      "completedAt": "2026-01-04T10:02:30.000Z"
+    }
+  ]
+}
+```

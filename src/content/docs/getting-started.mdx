@@ -175,7 +175,9 @@ Dashboard requires login with username and password configured in `.env` file.
 | 📷 **QR Code Scanner** | Scan QR codes directly from the dashboard |
 | 📡 **Live Events** | Real-time WebSocket event viewer with filtering |
 | 💬 **Quick Send** | Send messages quickly to any number |
-| 🧪 **API Tester** | Test all 30+ API endpoints with pre-filled templates |
+| 🧪 **API Tester** | Test all 40+ API endpoints with pre-filled templates |
+| 📤 **Bulk Messaging** | Send messages to multiple recipients with job tracking |
+| 🔗 **Webhook Manager** | Add, remove, and configure webhooks per session |
 | 🚪 **Logout** | Secure logout button in header |
 
 ---
@@ -187,7 +189,8 @@ chatery_whatsapp/
 ├── index.js                 # Application entry point
 ├── package.json
 ├── .env                     # Environment variables
-├── README.md                # Documentation
+├── Dockerfile               # Docker configuration
+├── docker-compose.yml       # Docker Compose config
 ├── public/
 │   ├── dashboard.html       # Admin dashboard
 │   ├── websocket-test.html  # WebSocket test page
@@ -198,6 +201,19 @@ chatery_whatsapp/
 │   └── {sessionId}/
 │       ├── creds.json
 │       └── store.json
+└── src/
+    ├── routes/
+    │   └── whatsapp.js      # API routes
+    └── services/
+        ├── websocket/
+        │   └── WebSocketManager.js
+        └── whatsapp/
+            ├── index.js
+            ├── WhatsAppManager.js
+            ├── WhatsAppSession.js
+            ├── BaileysStore.js
+            └── MessageFormatter.js
+```
 └── src/
     ├── routes/
     │   └── whatsapp.js      # API routes

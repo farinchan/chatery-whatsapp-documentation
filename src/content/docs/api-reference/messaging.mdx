@@ -1,13 +1,16 @@
 ---
 title: Messaging
 group: API Reference
-description: Send various types of messages - text, images, documents, locations, contacts, and buttons.
+description: Send various types of messages - text, images, documents, audio, polls, locations, contacts, and more.
 priority: 9
 ---
 
 ## Overview
 
-Messaging API allows you to send various types of messages through WhatsApp. All messaging endpoints support `typingTime` parameter (in milliseconds) to simulate typing before sending the message, making the bot appear more human-like.
+Messaging API allows you to send various types of messages through WhatsApp. All messaging endpoints support:
+
+- **`typingTime`** parameter (in milliseconds) to simulate typing before sending the message, making the bot appear more human-like.
+- **`replyTo`** parameter to reply/quote a specific message by passing the message ID.
 
 **Base URL:** `http://localhost:3000/api/whatsapp`
 
@@ -27,7 +30,8 @@ POST /chats/send-text
   "sessionId": "mysession",
   "chatId": "628123456789",
   "message": "Hello, World!",
-  "typingTime": 2000
+  "typingTime": 2000,
+  "replyTo": "3EB0B430A2B52B67D0"
 }
 ```
 
@@ -37,6 +41,7 @@ POST /chats/send-text
 | `chatId` | string | Required. Phone number (628xxx) or group ID (xxx@g.us) |
 | `message` | string | Required. Text message to send |
 | `typingTime` | number | Optional. Typing duration in ms before sending (default: 0) |
+| `replyTo` | string | Optional. Message ID to reply to |
 
 ---
 
@@ -54,8 +59,9 @@ POST /chats/send-image
   "sessionId": "mysession",
   "chatId": "628123456789",
   "imageUrl": "https://example.com/image.jpg",
-  "caption": "Image caption",
-  "typingTime": 0
+  "caption": "Check this out!",
+  "typingTime": 1500,
+  "replyTo": null
 }
 ```
 
@@ -63,9 +69,10 @@ POST /chats/send-image
 |-----------|------|-------------|
 | `sessionId` | string | Required. Session ID |
 | `chatId` | string | Required. Phone number or group ID |
-| `imageUrl` | string | Required. Direct URL to image |
+| `imageUrl` | string | Required. Direct URL to image file |
 | `caption` | string | Optional. Image caption |
 | `typingTime` | number | Optional. Typing duration in ms (default: 0) |
+| `replyTo` | string | Optional. Message ID to reply to |
 
 ---
 
@@ -85,7 +92,9 @@ POST /chats/send-document
   "documentUrl": "https://example.com/document.pdf",
   "filename": "document.pdf",
   "mimetype": "application/pdf",
-  "typingTime": 1000
+  "caption": "Here is the document you requested",
+  "typingTime": 1000,
+  "replyTo": null
 }
 ```
 
@@ -96,7 +105,44 @@ POST /chats/send-document
 | `documentUrl` | string | Required. Direct URL to document |
 | `filename` | string | Required. Filename to display |
 | `mimetype` | string | Optional. MIME type (default: application/pdf) |
+| `caption` | string | Optional. Caption text for the document |
 | `typingTime` | number | Optional. Typing duration in ms (default: 0) |
+| `replyTo` | string | Optional. Message ID to reply to |
+
+---
+
+## Send Audio
+
+Send an audio file or voice note.
+
+```http
+POST /chats/send-audio
+```
+
+> ⚠️ **Important:** Audio must be in OGG format (`.ogg`). WhatsApp only supports OGG audio files with Opus codec.
+>
+> Convert audio using FFmpeg: `ffmpeg -i input.mp3 -c:a libopus output.ogg`
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "chatId": "628123456789",
+  "audioUrl": "https://example.com/audio.ogg",
+  "ptt": true,
+  "typingTime": 1000,
+  "replyTo": null
+}
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `sessionId` | string | Required. Session ID |
+| `chatId` | string | Required. Phone number or group ID |
+| `audioUrl` | string | Required. Direct URL to OGG audio file (`.ogg` format only) |
+| `ptt` | boolean | Optional. Push to talk mode — `true` = voice note, `false` = audio file (default: false) |
+| `typingTime` | number | Optional. Recording simulation in ms (default: 0) |
+| `replyTo` | string | Optional. Message ID to reply to |
 
 ---
 
@@ -116,7 +162,8 @@ POST /chats/send-location
   "latitude": -6.2088,
   "longitude": 106.8456,
   "name": "Jakarta, Indonesia",
-  "typingTime": 1000
+  "typingTime": 1000,
+  "replyTo": null
 }
 ```
 
@@ -128,6 +175,7 @@ POST /chats/send-location
 | `longitude` | number | Required. GPS longitude |
 | `name` | string | Optional. Location name |
 | `typingTime` | number | Optional. Typing duration in ms (default: 0) |
+| `replyTo` | string | Optional. Message ID to reply to |
 
 ---
 
@@ -146,7 +194,8 @@ POST /chats/send-contact
   "chatId": "628123456789",
   "contactName": "John Doe",
   "contactPhone": "628987654321",
-  "typingTime": 500
+  "typingTime": 500,
+  "replyTo": null
 }
 ```
 
@@ -157,12 +206,46 @@ POST /chats/send-contact
 | `contactName` | string | Required. Contact display name |
 | `contactPhone` | string | Required. Contact phone number |
 | `typingTime` | number | Optional. Typing duration in ms (default: 0) |
+| `replyTo` | string | Optional. Message ID to reply to |
 
 ---
 
-## Send Button Message
+## Send Poll Message
 
-Send a message with interactive buttons.
+Send an interactive poll with single or multiple choice options.
+
+```http
+POST /chats/send-poll
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "chatId": "628123456789",
+  "question": "What is your favorite color?",
+  "options": ["Red", "Blue", "Green", "Yellow"],
+  "selectableCount": 1,
+  "typingTime": 2000,
+  "replyTo": null
+}
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `sessionId` | string | Required. Session ID |
+| `chatId` | string | Required. Phone number or group ID |
+| `question` | string | Required. Poll question |
+| `options` | array | Required. Array of options (2-12 items) |
+| `selectableCount` | number | Optional. Number of selectable options (default: 1) |
+| `typingTime` | number | Optional. Typing duration in ms (default: 0) |
+| `replyTo` | string | Optional. Message ID to reply to |
+
+---
+
+## Send Button Message (DEPRECATED)
+
+> ⚠️ **Note:** WhatsApp deprecated button messages in 2022. This endpoint now uses Poll as an alternative. For actual interactive buttons, you need WhatsApp Business API (Cloud API).
 
 ```http
 POST /chats/send-button
@@ -176,7 +259,8 @@ POST /chats/send-button
   "text": "Please choose an option:",
   "footer": "Powered by Chatery",
   "buttons": ["Option 1", "Option 2", "Option 3"],
-  "typingTime": 2000
+  "typingTime": 2000,
+  "replyTo": null
 }
 ```
 
@@ -184,10 +268,11 @@ POST /chats/send-button
 |-----------|------|-------------|
 | `sessionId` | string | Required. Session ID |
 | `chatId` | string | Required. Phone number or group ID |
-| `text` | string | Required. Button message text |
-| `footer` | string | Optional. Footer text |
-| `buttons` | array | Required. Array of button labels (max 3) |
+| `text` | string | Required. Poll question (combined with footer) |
+| `footer` | string | Optional. Additional text |
+| `buttons` | array | Required. Array of options (poll choices) |
 | `typingTime` | number | Optional. Typing duration in ms (default: 0) |
+| `replyTo` | string | Optional. Message ID to reply to |
 
 ---
 

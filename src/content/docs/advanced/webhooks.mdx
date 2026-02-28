@@ -58,16 +58,23 @@ DELETE /sessions/:sessionId/webhooks
 
 ## Webhook Payload
 
-All webhook requests are sent as `POST` with JSON body:
+All configured webhook endpoints will receive `POST` requests with this format:
 
 ```json
 {
+  "event": "message",
   "sessionId": "mysession",
-  "type": "message",
-  "timestamp": 1609459200,
+  "metadata": {
+    "userId": "123",
+    "customField": "value"
+  },
   "data": {
-    // Event-specific data
-  }
+    "id": "ABC123",
+    "from": "628123456789@s.whatsapp.net",
+    "text": "Hello!",
+    "timestamp": 1234567890
+  },
+  "timestamp": "2024-01-15T10:30:00.000Z"
 }
 ```
 
@@ -77,47 +84,35 @@ All webhook requests are sent as `POST` with JSON body:
 
 Each webhook request includes these headers:
 
-| Header | Description |
-|--------|-------------|
+| Header | Value |
+|--------|-------|
 | `Content-Type` | `application/json` |
-| `X-Chatery-Signature` | HMAC signature for verification (if configured) |
-| `X-Chatery-Event` | Event type (e.g., `message`, `connection.update`) |
-| `X-Chatery-Session` | Session ID |
+| `X-Webhook-Source` | `chatery-whatsapp-api` |
+| `X-Session-Id` | Session ID |
+| `X-Webhook-Event` | Event name |
 
 ---
 
 ## Available Webhook Events
 
-### Message Events
-
 | Event | Description |
 |-------|-------------|
+| `connection.update` | Connection status changed (connected, disconnected) |
 | `message` | New message received |
-| `message.sent` | Message was sent |
-| `message.update` | Message status updated |
-| `message.delete` | Message was deleted |
-| `message.reaction` | Message reaction added/removed |
-
-### Connection Events
-
-| Event | Description |
-|-------|-------------|
-| `connection.update` | Session connection status changed |
-| `qr.update` | New QR code generated |
-| `session.ready` | Session fully connected |
-| `session.disconnected` | Session disconnected |
-
-### Group Events
-
-| Event | Description |
-|-------|-------------|
-| `group.update` | Group info updated |
-| `group.participants.update` | Participants added/removed |
-
-### Special Events
-
-| Event | Description |
-|-------|-------------|
+| `message.sent` | Message sent confirmation |
+| `message.update` | Message status update (read, delivered) |
+| `message.reaction` | Message reaction added |
+| `message.revoke` | Message deleted/revoked |
+| `chat.update` | Chat updated |
+| `chat.upsert` | New chat created |
+| `chat.delete` | Chat deleted |
+| `contact.update` | Contact updated |
+| `presence.update` | Typing, online status |
+| `group.participants` | Group members changed |
+| `group.update` | Group info changed |
+| `call` | Incoming call |
+| `labels` | Labels updated (business) |
+| `logged.out` | Session logged out |
 | `all` | Subscribe to all events |
 
 ---
@@ -181,9 +176,8 @@ Each webhook request includes these headers:
 
 1. **Respond Quickly** - Return a 2xx status code within 5 seconds
 2. **Handle Retries** - Implement idempotency for duplicate events
-3. **Verify Signature** - Validate the `X-Chatery-Signature` header
-4. **Use HTTPS** - Always use secure endpoints in production
-5. **Queue Processing** - Process events asynchronously if heavy processing is needed
+3. **Use HTTPS** - Always use secure endpoints in production
+4. **Queue Processing** - Process events asynchronously if heavy processing is needed
 
 ---
 
@@ -198,13 +192,13 @@ const app = express();
 app.use(express.json());
 
 app.post('/webhook', (req, res) => {
-  const { sessionId, type, data } = req.body;
+  const { event, sessionId, metadata, data, timestamp } = req.body;
   
-  console.log(`[${sessionId}] Event: ${type}`);
+  console.log(`[${sessionId}] Event: ${event} at ${timestamp}`);
   
-  switch (type) {
+  switch (event) {
     case 'message':
-      console.log(`New message from ${data.from}: ${data.content}`);
+      console.log(`New message from ${data.from}: ${data.text}`);
       break;
     case 'connection.update':
       console.log(`Connection status: ${data.status}`);
@@ -231,18 +225,19 @@ app = Flask(__name__)
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
-    data = request.json
+    payload = request.json
     
-    session_id = data.get('sessionId')
-    event_type = data.get('type')
-    event_data = data.get('data')
+    event = payload.get('event')
+    session_id = payload.get('sessionId')
+    metadata = payload.get('metadata')
+    data = payload.get('data')
     
-    print(f"[{session_id}] Event: {event_type}")
+    print(f"[{session_id}] Event: {event}")
     
-    if event_type == 'message':
-        print(f"New message from {event_data['from']}: {event_data['content']}")
-    elif event_type == 'connection.update':
-        print(f"Connection status: {event_data['status']}")
+    if event == 'message':
+        print(f"New message from {data['from']}: {data.get('text', '')}")
+    elif event == 'connection.update':
+        print(f"Connection status: {data['status']}")
     
     return jsonify({'received': True}), 200
 

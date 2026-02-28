@@ -32,11 +32,31 @@ GET /sessions
       "status": "connected",
       "isConnected": true,
       "phoneNumber": "628123456789",
-      "name": "John Doe"
+      "name": "John Doe",
+      "webhooks": [
+        {
+          "url": "https://your-server.com/webhook",
+          "events": ["message", "message_ack"]
+        }
+      ],
+      "metadata": {
+        "userId": "user123",
+        "plan": "premium"
+      }
     }
   ]
 }
 ```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `sessionId` | string | Unique session identifier |
+| `status` | string | Current status: `disconnected`, `connecting`, `qr_ready`, `connected` |
+| `isConnected` | boolean | Whether session is currently connected |
+| `phoneNumber` | string | Connected WhatsApp phone number |
+| `name` | string | WhatsApp profile name |
+| `webhooks` | array | Configured webhooks for this session |
+| `metadata` | object | Custom metadata associated with this session |
 
 ---
 

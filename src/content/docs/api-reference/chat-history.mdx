@@ -119,7 +119,7 @@ POST /chats/info
 
 ## Mark Chat as Read
 
-Mark messages in a chat as read.
+Mark all unread messages in a chat as read. Works for both personal and group chats.
 
 ```http
 POST /chats/mark-read
@@ -129,16 +129,35 @@ POST /chats/mark-read
 ```json
 {
   "sessionId": "mysession",
-  "chatId": "628123456789",
-  "messageId": null
+  "chatId": "628123456789"
 }
 ```
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
 | `sessionId` | string | Required. Session ID |
-| `chatId` | string | Required. Phone number or group ID |
-| `messageId` | string | Optional. Specific message ID to mark as read |
+| `chatId` | string | Required. Phone number or group ID (`@s.whatsapp.net` or `@g.us`) |
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Chat marked as read",
+  "data": {
+    "chatId": "628123456789@s.whatsapp.net",
+    "isGroup": false,
+    "markedCount": 5
+  }
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `chatId` | string | Chat ID that was marked as read |
+| `isGroup` | boolean | Whether the chat is a group |
+| `markedCount` | number | Number of messages marked as read |
+
+> **Note:** Messages must be received after the server starts to be in the store. If `markedCount` is 0, there were no unread messages in the store.
 
 ---
 
