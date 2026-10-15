@@ -1,0 +1,398 @@
+---
+title: Contacts & Profile
+group: API Reference
+description: Manage contacts, WhatsApp Business profiles, blocklists, and update account bio and display name.
+priority: 5
+---
+
+## Overview
+
+The Contacts & Profile API allows you to manage address book contacts, inspect WhatsApp Business profiles, manage blocklists, check phone registration, and update your WhatsApp account's public display name and "About" bio.
+
+**Base URL:** `http://localhost:3000/api/whatsapp`
+
+---
+
+## Get Contacts
+
+Get all contacts stored in the session store with optional pagination and search filtering.
+
+```http
+POST /contacts
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "limit": 100,
+  "offset": 0,
+  "search": "john"
+}
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `sessionId` | string | Required. Session ID |
+| `limit` | number | Optional. Max results (default: 100) |
+| `offset` | number | Optional. Pagination offset (default: 0) |
+| `search` | string | Optional. Search query for contact name, phone number, or ID |
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "contacts": [
+      {
+        "id": "628123456789@s.whatsapp.net",
+        "name": "John Doe",
+        "notify": "John",
+        "verifiedName": null,
+        "imgUrl": "https://pps.whatsapp.net/v/..."
+      }
+    ],
+    "count": 1,
+    "total": 45
+  }
+}
+```
+
+---
+
+## Add / Save Contact
+
+Add or update a contact in the WhatsApp address book. Supports syncing the contact to the primary phone's native address book (Google Contacts / iCloud) via `syncContactToPhone`.
+
+> **Note:** `/contacts/save` is available as an alias for this endpoint.
+
+```http
+POST /contacts/add
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "phone": "628123456789",
+  "name": "Budi Santoso",
+  "firstName": "Budi",
+  "syncContactToPhone": false
+}
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `sessionId` | string | Required. Session ID |
+| `phone` | string | Required. Phone number (e.g. `628123456789`) |
+| `name` | string | Required. Contact full name or display name |
+| `firstName` | string | Optional. Contact first name |
+| `syncContactToPhone` | boolean | Optional. Whether to sync contact to the phone's native address book (default: `false`). Alias: `syncToPhone` |
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Contact added successfully",
+  "data": {
+    "id": "628123456789@s.whatsapp.net",
+    "phone": "628123456789",
+    "name": "Budi Santoso",
+    "syncContactToPhone": false
+  }
+}
+```
+
+---
+
+## Get Contact Status (Bio)
+
+Fetch the WhatsApp "About" (status/bio) text of a given phone number.
+
+```http
+POST /contacts/status
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "phone": "628123456789"
+}
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `sessionId` | string | Required. Session ID |
+| `phone` | string | Required. Phone number |
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "status": "Hey there! I am using WhatsApp.",
+    "setAt": "2026-01-01T12:00:00.000Z"
+  }
+}
+```
+
+---
+
+## Get WhatsApp Business Profile
+
+Fetch business profile details for a WhatsApp Business account (description, address, email, websites, category).
+
+```http
+POST /contacts/business-profile
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "phone": "628123456789"
+}
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `sessionId` | string | Required. Session ID |
+| `phone` | string | Required. Phone number |
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "wid": "628123456789@s.whatsapp.net",
+    "description": "Official Support for MyApp",
+    "address": "Jakarta, Indonesia",
+    "email": "support@example.com",
+    "websites": ["https://example.com"],
+    "category": "Customer Support"
+  }
+}
+```
+
+---
+
+## Block or Unblock Contact
+
+Block or unblock a contact from sending messages and calling.
+
+```http
+POST /contacts/block
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "phone": "628123456789",
+  "action": "block"
+}
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `sessionId` | string | Required. Session ID |
+| `phone` | string | Required. Phone number to block or unblock |
+| `action` | string | Optional. Action: `block` or `unblock` (default: `block`) |
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Contact blocked successfully",
+  "data": {
+    "phone": "628123456789",
+    "action": "block"
+  }
+}
+```
+
+---
+
+## Get Blocklist
+
+Get the list of all blocked contacts for the current session.
+
+```http
+POST /contacts/blocklist
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    "628123456789@s.whatsapp.net",
+    "628987654321@s.whatsapp.net"
+  ]
+}
+```
+
+---
+
+## Update Profile Status (Bio)
+
+Update your connected WhatsApp account's "About" bio status text.
+
+```http
+POST /profile/status
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "status": "Available on WhatsApp | Chatery API"
+}
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `sessionId` | string | Required. Session ID |
+| `status` | string | Required. New bio/status text |
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Profile status updated",
+  "data": {
+    "status": "Available on WhatsApp | Chatery API"
+  }
+}
+```
+
+---
+
+## Update Profile Display Name
+
+Update your connected WhatsApp account's public display name.
+
+```http
+POST /profile/name
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "name": "My Support Bot"
+}
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `sessionId` | string | Required. Session ID |
+| `name` | string | Required. New display name |
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Profile name updated",
+  "data": {
+    "name": "My Support Bot"
+  }
+}
+```
+
+---
+
+## Check Phone Number
+
+Check if a phone number is registered on WhatsApp and retrieve its JID.
+
+```http
+POST /chats/check-number
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "phone": "628123456789"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "exists": true,
+    "jid": "628123456789@s.whatsapp.net"
+  }
+}
+```
+
+---
+
+## Get Profile Picture
+
+Get the high-resolution profile picture URL of a phone number or chat.
+
+```http
+POST /chats/profile-picture
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "phone": "628123456789"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "profilePictureUrl": "https://pps.whatsapp.net/v/..."
+  }
+}
+```
+
+---
+
+## Get Contact Info
+
+Get detailed contact information including business profile and verification status.
+
+```http
+POST /chats/contact-info
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "phone": "628123456789"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "628123456789@s.whatsapp.net",
+    "name": "John Doe",
+    "notify": "John",
+    "status": "Hey there!",
+    "imgUrl": "https://pps.whatsapp.net/v/..."
+  }
+}
+```

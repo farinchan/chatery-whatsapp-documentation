@@ -1,0 +1,262 @@
+---
+title: Labels (Business)
+group: API Reference
+description: Manage WhatsApp Business labels - create, delete, and assign labels to personal or group chats.
+priority: 7
+---
+
+## Overview
+
+WhatsApp Business labels help you organize and categorize chats (e.g. "New Customer", "Pending Payment", "VIP"). 
+
+> ⚠️ **Note:** Labels are exclusively available for **WhatsApp Business** accounts. Regular (personal) WhatsApp accounts cannot use labels.
+
+**Base URL:** `http://localhost:3000/api/whatsapp`
+
+---
+
+## Get All Labels
+
+Retrieve all labels created in the current WhatsApp Business account.
+
+```http
+POST /labels
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "labels": [
+      {
+        "id": "1",
+        "name": "New Customer",
+        "color": 0
+      },
+      {
+        "id": "2",
+        "name": "Order Completed",
+        "color": 5
+      }
+    ],
+    "count": 2
+  }
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | string | Unique label ID |
+| `name` | string | Label display name |
+| `color` | number | Color ID (0 - 19) |
+
+---
+
+## Create / Update Label
+
+Create a new label or update an existing one.
+
+```http
+POST /labels/create
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "name": "VIP Customer",
+  "colorId": 3,
+  "labelId": null
+}
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `sessionId` | string | Required. Session ID |
+| `name` | string | Required. Label display name |
+| `colorId` | number | Optional. Color index (0-19, default: `0`) |
+| `labelId` | string \| null | Optional. Pass existing label ID to update instead of create |
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Label created successfully",
+  "data": {
+    "labelId": "3",
+    "name": "VIP Customer",
+    "color": 3
+  }
+}
+```
+
+---
+
+## Delete Label
+
+Delete a label permanently. All chats tagged with this label will have it detached.
+
+```http
+POST /labels/delete
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "labelId": "3"
+}
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `sessionId` | string | Required. Session ID |
+| `labelId` | string | Required. ID of the label to delete |
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Label deleted successfully",
+  "data": {
+    "labelId": "3"
+  }
+}
+```
+
+---
+
+## Add Label to Chat
+
+Assign a label to a personal contact chat or a group chat.
+
+```http
+POST /labels/chat/add
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "chatId": "628123456789",
+  "labelId": "3"
+}
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `sessionId` | string | Required. Session ID |
+| `chatId` | string | Required. Phone number or group ID |
+| `labelId` | string | Required. Label ID to attach |
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Label added to chat",
+  "data": {
+    "chatId": "628123456789@s.whatsapp.net",
+    "labelId": "3"
+  }
+}
+```
+
+---
+
+## Remove Label from Chat
+
+Detach a label from a specific chat.
+
+```http
+POST /labels/chat/remove
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "chatId": "628123456789",
+  "labelId": "3"
+}
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `sessionId` | string | Required. Session ID |
+| `chatId` | string | Required. Phone number or group ID |
+| `labelId` | string | Required. Label ID to detach |
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Label removed from chat",
+  "data": {
+    "chatId": "628123456789@s.whatsapp.net",
+    "labelId": "3"
+  }
+}
+```
+
+---
+
+## Get Labels for Chat
+
+Retrieve all labels currently assigned to a chat.
+
+```http
+POST /labels/chat
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "chatId": "628123456789"
+}
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `sessionId` | string | Required. Session ID |
+| `chatId` | string | Required. Phone number or group ID |
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "chatId": "628123456789@s.whatsapp.net",
+    "labels": [
+      {
+        "id": "3",
+        "name": "VIP Customer",
+        "color": 3
+      }
+    ]
+  }
+}
+```
+
+---
+
+## Label Color Reference
+
+WhatsApp provides 20 distinct color presets for labels indexed from `0` to `19`:
+
+| Color ID | Appearance | Suggested Usage |
+|:---:|---|---|
+| `0` | Blue | New Customer / Leads |
+| `1` | Yellow | New Order / In Progress |
+| `2` | Light Blue | Pending Payment |
+| `3` | Purple | Paid / VIP |
+| `4` | Green | Order Complete / Shipped |
+| `5` - `19` | Various hues (Orange, Red, Teal, etc.) | Custom workflows |

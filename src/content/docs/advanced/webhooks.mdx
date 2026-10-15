@@ -2,7 +2,7 @@
 title: Webhooks
 group: Advanced
 description: Configure webhooks to receive event notifications on your server.
-priority: 9
+priority: 2
 ---
 
 ## Overview
@@ -165,7 +165,44 @@ Each webhook request includes these headers:
     "groupId": "123456789@g.us",
     "action": "add",
     "participants": ["628111222333@s.whatsapp.net"],
-    "by": "628123456789@s.whatsapp.net"
+```
+
+### Reaction Event
+
+```json
+{
+  "sessionId": "mysession",
+  "type": "message.reaction",
+  "timestamp": 1609459200,
+  "data": {
+    "key": {
+      "remoteJid": "628123456789@s.whatsapp.net",
+      "id": "MSG_ID",
+      "fromMe": false
+    },
+    "reaction": {
+      "text": "👍",
+      "senderTimestampMs": 1609459200000
+    }
+  }
+}
+```
+
+### Incoming Call Event
+
+```json
+{
+  "sessionId": "mysession",
+  "type": "call",
+  "timestamp": 1609459200,
+  "data": {
+    "chatId": "628123456789@s.whatsapp.net",
+    "from": "628123456789@s.whatsapp.net",
+    "id": "CALL_123",
+    "date": "2026-01-01T12:00:00.000Z",
+    "isVideo": false,
+    "isGroup": false,
+    "status": "offer"
   }
 }
 ```

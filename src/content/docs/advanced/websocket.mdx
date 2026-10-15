@@ -2,7 +2,7 @@
 title: WebSocket Events
 group: Advanced
 description: Real-time WebSocket events for receiving instant notifications and updates.
-priority: 10
+priority: 1
 ---
 
 ## Overview
@@ -13,19 +13,52 @@ Chatery WhatsApp API provides real-time WebSocket support for receiving instant 
 
 ---
 
-## Connection
+## Connection & Authentication
 
-Connect to the WebSocket server using Socket.IO client:
+Connect to the WebSocket server using the Socket.IO client. When `API_KEY` is enabled on the server, you must provide authentication credentials (API key or dashboard token):
 
 ```javascript
 import { io } from 'socket.io-client';
 
-const socket = io('http://localhost:3000');
+// Option 1: Authenticate with API Key
+const socket = io('http://localhost:3000', {
+  auth: {
+    apiKey: 'your_super_secret_api_key'
+  }
+});
 
-// Subscribe to a session
-socket.emit('subscribe', 'mysession');
+// Option 2: Authenticate with Dashboard Token (or cookie)
+const socketWithToken = io('http://localhost:3000', {
+  auth: {
+    token: 'your_dashboard_jwt_token'
+  }
+});
 
-// Unsubscribe from a session
+// Confirmation on successful connection
+socket.on('connect', () => {
+  console.log('Connected to WebSocket with ID:', socket.id);
+
+  // Subscribe to a session's event room
+  socket.emit('subscribe', 'mysession');
+});
+
+// Confirmation of session subscription
+socket.on('subscribed', (data) => {
+  console.log('Subscribed:', data.message); // Subscribed to session mysession
+});
+
+// Confirmation of session unsubscription
+socket.on('unsubscribed', (data) => {
+  console.log('Unsubscribed from session:', data.sessionId);
+});
+
+// Heartbeat ping-pong
+socket.emit('ping');
+socket.on('pong', (data) => {
+  console.log('Pong received at:', data.timestamp);
+});
+
+// Unsubscribe when leaving
 socket.emit('unsubscribe', 'mysession');
 ```
 
@@ -107,6 +140,60 @@ socket.on('group.participants.update', (data) => {
   //     groupId: '123456789@g.us',
   //     action: 'add', // or 'remove', 'promote', 'demote'
   //     participants: ['628123456789@s.whatsapp.net']
+  //   }
+  // }
+});
+```
+
+### Reaction Event
+
+```javascript
+socket.on('message.reaction', (data) => {
+  console.log('Reaction event:', data);
+  // {
+  //   sessionId: 'mysession',
+  //   reactions: [
+  //     {
+  //       key: { remoteJid: '628123456789@s.whatsapp.net', id: 'MSG_ID', fromMe: false },
+  //       reaction: { text: '👍', senderTimestampMs: 1704326400000 }
+  //     }
+  //   ]
+  // }
+});
+```
+
+### Call Event
+
+```javascript
+socket.on('call', (data) => {
+  console.log('Incoming call:', data);
+  // {
+  //   sessionId: 'mysession',
+  //   call: [
+  //     {
+  //       chatId: '628123456789@s.whatsapp.net',
+  //       from: '628123456789@s.whatsapp.net',
+  //       id: 'CALL_ID',
+  //       date: '2026-01-01T12:00:00.000Z',
+  //       isVideo: false,
+  //       isGroup: false,
+  //       status: 'offer'
+  //     }
+  //   ]
+  // }
+});
+```
+
+### Labels Event (Business)
+
+```javascript
+socket.on('labels', (data) => {
+  console.log('Labels event:', data);
+  // {
+  //   sessionId: 'mysession',
+  //   labels: {
+  //     type: 'association', // or 'edit'
+  //     association: { chatId: '628123456789@s.whatsapp.net', labelId: '3', type: 'add' }
   //   }
   // }
 });

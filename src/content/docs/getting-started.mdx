@@ -2,7 +2,7 @@
 title: Getting Started
 group: Overview
 description: Learn how to install and set up Chatery WhatsApp API.
-priority: 9
+priority: 2
 ---
 
 ## 🛠 Installation
@@ -57,15 +57,14 @@ docker-compose down
 | `docker-compose restart` | Restart container |
 | `docker-compose build --no-cache` | Rebuild image |
 
-#### Docker Volumes
+#### Docker Volumes (Bind Mounts)
 
-The following data is persisted across container restarts:
+The following local host directories are bind-mounted and persisted across container restarts:
 
-| Volume | Path | Description |
-|--------|------|-------------|
-| `chatery_sessions` | `/app/sessions` | WhatsApp session data |
-| `chatery_media` | `/app/public/media` | Received media files |
-| `chatery_store` | `/app/store` | Message history store |
+| Host Directory | Container Path | Description |
+|----------------|----------------|-------------|
+| `./sessions` | `/app/sessions` | WhatsApp authentication credentials (`creds.json`), config, and message cache (`store.json`) |
+| `./public/media` | `/app/public/media` | Auto-saved received media files organized by `{sessionId}/{chatId}/` |
 
 ---
 
@@ -73,17 +72,39 @@ The following data is persisted across container restarts:
 
 Create a `.env` file in the root directory:
 
-```env
+```bash
 PORT=3000
+NODE_ENV=production
 CORS_ORIGIN=*
 
 # Dashboard Authentication
 DASHBOARD_USERNAME=admin
 DASHBOARD_PASSWORD=securepassword123
 
-# API Key Authentication (optional - leave empty or 'your_api_key_here' to disable)
+# API Key Authentication (leave empty or 'your_api_key_here' to disable)
 API_KEY=your_secret_api_key_here
+
+# Performance & Multi-Session Optimization
+SYNC_FULL_HISTORY=false
+AUTO_DOWNLOAD_MEDIA=true
+MAX_MESSAGES_PER_CHAT=100
+MAX_MEDIA_DOWNLOAD_SIZE_MB=25
 ```
+
+### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PORT` | `3000` | Port for Express HTTP & Socket.IO server |
+| `NODE_ENV` | `development` | Environment mode (`development` or `production`) |
+| `CORS_ORIGIN` | `*` | Allowed CORS origins for REST API and WebSocket |
+| `DASHBOARD_USERNAME` | `admin` | Username for dashboard & web client login |
+| `DASHBOARD_PASSWORD` | `admin` | Password for dashboard & web client login |
+| `API_KEY` | *(empty)* | Secret key for `X-Api-Key` header authentication |
+| `SYNC_FULL_HISTORY` | `false` | Sync full chat history on WhatsApp connection (heavy memory) |
+| `AUTO_DOWNLOAD_MEDIA` | `true` | Automatically download and save incoming media to server |
+| `MAX_MESSAGES_PER_CHAT` | `100` | Maximum message history kept in memory per chat |
+| `MAX_MEDIA_DOWNLOAD_SIZE_MB` | `25` | Maximum media file size allowed for auto-download (in MB) |
 
 ---
 
@@ -94,7 +115,7 @@ All WhatsApp API endpoints are protected with API key authentication. Include th
 ### How to Enable
 
 1. Set a strong API key in your `.env` file:
-```env
+```bash
 API_KEY=your_super_secret_key_12345
 ```
 
@@ -108,7 +129,7 @@ curl -X GET http://localhost:3000/api/whatsapp/sessions \
 
 To disable API key authentication, leave `API_KEY` empty or set it to `your_api_key_here` in `.env`:
 
-```env
+```bash
 API_KEY=
 # or
 API_KEY=your_api_key_here
@@ -164,7 +185,7 @@ Dashboard requires login with username and password configured in `.env` file.
 | Field | Default Value |
 |-------|---------------|
 | Username | `admin` |
-| Password | `admin123` |
+| Password | `admin` |
 
 ### ✨ Dashboard Features
 
@@ -182,48 +203,73 @@ Dashboard requires login with username and password configured in `.env` file.
 
 ---
 
+## 💬 WhatsApp Web Client (`/wa-web`)
+
+Chatery includes a built-in, lightweight web client interface that allows you to chat directly through your connected WhatsApp session:
+
+- **URL:** `http://localhost:3000/wa-web`
+- **Protection:** Protected by the same dashboard authentication (`dashboardAuthGuard`).
+- **Features:** Real-time chat list, message thread viewer, instant message sending, media preview, and incoming message notifications via Socket.IO.
+
+---
+
+## 🧪 Testing
+
+The backend includes a comprehensive test suite with 160+ automated tests across unit, integration, and WebSocket modules using the native Node.js test runner:
+
+```bash
+# Run all tests
+npm test
+
+# Run only unit tests (BaileysStore, MessageFormatter, Auth Middleware)
+npm run test:unit
+
+# Run only WebSocket tests (Rooms, Event Emitters, Broadcasts)
+npm run test:websocket
+
+# Run only REST API integration tests
+npm run test:integration
+```
+
+---
+
 ## 📁 Project Structure
 
 ```
 chatery_whatsapp/
-├── index.js                 # Application entry point
+├── index.js                 # Application entry point & Express server
 ├── package.json
 ├── .env                     # Environment variables
-├── Dockerfile               # Docker configuration
-├── docker-compose.yml       # Docker Compose config
+├── Dockerfile               # Docker container configuration
+├── docker-compose.yml       # Docker Compose service definition
 ├── public/
-│   ├── dashboard.html       # Admin dashboard
-│   ├── websocket-test.html  # WebSocket test page
+│   ├── dashboard.html       # Admin dashboard UI
+│   ├── wa-web.html          # WhatsApp Web client UI
+│   ├── login.html           # Authentication portal
+│   ├── websocket-test.html  # WebSocket test tool
 │   └── media/               # Auto-saved media files
 │       └── {sessionId}/
 │           └── {chatId}/
 ├── sessions/                # Session authentication data
 │   └── {sessionId}/
-│       ├── creds.json
-│       └── store.json
+│       ├── creds.json       # WhatsApp credentials
+│       └── store.json       # Local message history cache
 └── src/
+    ├── config/
+    │   ├── swagger.js       # Swagger OpenAPI definition
+    │   └── swagger-paths.js # JSDoc OpenAPI path specifications
+    ├── middleware/
+    │   ├── apiKeyAuth.js    # API key authentication guard
+    │   └── dashboard-auth.js # Dashboard cookie & JWT session guard
     ├── routes/
-    │   └── whatsapp.js      # API routes
+    │   └── whatsapp.js      # REST API route handlers
     └── services/
         ├── websocket/
-        │   └── WebSocketManager.js
+        │   └── WebSocketManager.js # Socket.IO manager & event broadcaster
         └── whatsapp/
             ├── index.js
-            ├── WhatsAppManager.js
-            ├── WhatsAppSession.js
-            ├── BaileysStore.js
-            └── MessageFormatter.js
-```
-└── src/
-    ├── routes/
-    │   └── whatsapp.js      # API routes
-    └── services/
-        ├── websocket/
-        │   └── WebSocketManager.js
-        └── whatsapp/
-            ├── index.js
-            ├── WhatsAppManager.js
-            ├── WhatsAppSession.js
-            ├── BaileysStore.js
-            └── MessageFormatter.js
+            ├── WhatsAppManager.js # Multi-session coordinator
+            ├── WhatsAppSession.js # Baileys socket lifecycle & operations
+            ├── BaileysStore.js    # In-memory message & contact store with cache
+            └── MessageFormatter.js # Inbound/outbound message serializer
 ```

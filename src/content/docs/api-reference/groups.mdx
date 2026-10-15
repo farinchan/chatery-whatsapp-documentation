@@ -2,7 +2,7 @@
 title: Group Management
 group: API Reference
 description: Create and manage WhatsApp groups - participants, settings, and invitations.
-priority: 7
+priority: 6
 ---
 
 ## Overview
@@ -338,6 +338,42 @@ POST /groups/revoke-invite
 {
   "sessionId": "mysession",
   "groupId": "123456789@g.us"
+}
+```
+
+### Get Group Invite Info (Preview Group)
+
+Inspect and preview group information (subject, description, creator, participant count) from an invite link or invite code without joining the group.
+
+```http
+POST /groups/invite-info
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "inviteCode": "https://chat.whatsapp.com/AbCdEfGhIjKlMn"
+}
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `sessionId` | string | Required. Session ID |
+| `inviteCode` | string | Required. Group invite code or full WhatsApp invite link |
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "123456789@g.us",
+    "subject": "Community Discussion",
+    "owner": "628123456789@s.whatsapp.net",
+    "creation": 1704326400,
+    "size": 42,
+    "desc": "Official community discussion group"
+  }
 }
 ```
 

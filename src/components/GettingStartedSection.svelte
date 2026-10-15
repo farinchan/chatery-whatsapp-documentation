@@ -21,12 +21,18 @@
 			<span
 				class="text-[16px] font-normal leading-[140%] tracking-[-0.16px] text-[#56565C] dark:text-[#A3A3A0]"
 			>
-				This is Acme Inc's open-source design system for building consistent and reusable user
-				interfaces. It is designed to prioritize collaboration, dev experience, and accessibility.
+				This is the official documentation for Chatery WhatsApp API — a powerful WhatsApp backend built with Express.js and Baileys. It provides multi-session management, real-time WebSockets, group operations, bulk messaging, and business labels.
 			</span>
 
 			<div class="flex gap-2">
-				<Button variant="primary" className="rounded-lg text-white px-[10px] py-[8px] h-[32px]">
+				<Button
+					variant="primary"
+					className="rounded-lg text-white px-[10px] py-[8px] h-[32px]"
+					on:click={() => {
+						const el = document.getElementById('installation');
+						if (el) el.scrollIntoView({ behavior: 'smooth' });
+					}}
+				>
 					Get started
 				</Button>
 
@@ -34,7 +40,7 @@
 					variant="secondary"
 					className="rounded-lg text-white px-[10px] py-[8px] h-[32px]"
 					on:click={() => {
-						window.open('https://github.com/appwrite/template-for-documentation', '_blank');
+						window.open('https://github.com/farinchan/chatery_whatsapp', '_blank');
 					}}
 				>
 					<div class="flex items-center justify-center gap-[6px]">

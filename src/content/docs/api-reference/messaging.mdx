@@ -2,7 +2,7 @@
 title: Messaging
 group: API Reference
 description: Send various types of messages - text, images, documents, audio, polls, locations, contacts, and more.
-priority: 9
+priority: 2
 ---
 
 ## Overview
@@ -146,6 +146,68 @@ POST /chats/send-audio
 
 ---
 
+## Send Video
+
+Send a video file with optional caption, GIF playback mode, and typing duration.
+
+```http
+POST /chats/send-video
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "chatId": "628123456789",
+  "videoUrl": "https://example.com/video.mp4",
+  "caption": "Watch this video!",
+  "gifPlayback": false,
+  "typingTime": 1500,
+  "replyTo": null
+}
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `sessionId` | string | Required. Session ID |
+| `chatId` | string | Required. Phone number or group ID |
+| `videoUrl` | string | Required. Direct URL to MP4 video file |
+| `caption` | string | Optional. Video caption |
+| `gifPlayback` | boolean | Optional. Play as looping GIF (default: `false`) |
+| `typingTime` | number | Optional. Typing duration in ms (default: 0) |
+| `replyTo` | string | Optional. Message ID to reply to |
+
+---
+
+## Send Sticker
+
+Send a static or animated sticker. Sticker file must be in WebP format.
+
+```http
+POST /chats/send-sticker
+```
+
+> 💡 **Tip:** WhatsApp stickers must be in WebP format (`.webp`). Supports both static and animated stickers.
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "chatId": "628123456789",
+  "stickerUrl": "https://example.com/sticker.webp",
+  "replyTo": null
+}
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `sessionId` | string | Required. Session ID |
+| `chatId` | string | Required. Phone number or group ID |
+| `stickerUrl` | string | Required. Direct URL to WebP sticker file |
+| `replyTo` | string | Optional. Message ID to reply to |
+
+---
+
 ## Send Location
 
 Send a GPS location.
@@ -273,6 +335,193 @@ POST /chats/send-button
 | `buttons` | array | Required. Array of options (poll choices) |
 | `typingTime` | number | Optional. Typing duration in ms (default: 0) |
 | `replyTo` | string | Optional. Message ID to reply to |
+
+---
+
+## Send Reaction
+
+Send an emoji reaction to a specific message, or remove an existing reaction.
+
+```http
+POST /chats/send-reaction
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "chatId": "628123456789",
+  "messageId": "3EB0B430A2B52B67D0",
+  "emoji": "👍",
+  "fromMe": false
+}
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `sessionId` | string | Required. Session ID |
+| `chatId` | string | Required. Phone number or group ID |
+| `messageId` | string | Required. Target message ID to react to |
+| `emoji` | string | Optional. Emoji reaction character. Pass an empty string `""` to remove an existing reaction |
+| `fromMe` | boolean | Optional. Whether the target message was sent by yourself (default: `false`) |
+
+---
+
+## Delete (Revoke) Message
+
+Delete (revoke) a message for everyone in a personal or group chat.
+
+```http
+POST /chats/delete-message
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "chatId": "628123456789",
+  "messageId": "3EB0B430A2B52B67D0"
+}
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `sessionId` | string | Required. Session ID |
+| `chatId` | string | Required. Phone number or group ID |
+| `messageId` | string | Required. ID of the message to revoke/delete for everyone |
+
+---
+
+## Pin / Unpin Message
+
+Pin a message to the top of a conversation. Supports duration presets (24 hours, 7 days, 30 days) or unpinning.
+
+```http
+POST /chats/pin-message
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "chatId": "628123456789",
+  "messageId": "3EB0B430A2B52B67D0",
+  "time": 604800,
+  "fromMe": false
+}
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `sessionId` | string | Required. Session ID |
+| `chatId` | string | Required. Phone number or group ID |
+| `messageId` | string | Required. Target message ID to pin/unpin |
+| `time` | number | Optional. Pin duration in seconds (`86400` = 24h, `604800` = 7d, `2592000` = 30d, `0` = unpin, default: `604800`) |
+| `fromMe` | boolean | Optional. Whether the message was sent by yourself (default: `false`) |
+
+---
+
+## Star / Unstar Message
+
+Star or unstar a message for easy reference and bookmarking.
+
+```http
+POST /chats/star-message
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "chatId": "628123456789",
+  "messageId": "3EB0B430A2B52B67D0",
+  "star": true,
+  "fromMe": false
+}
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `sessionId` | string | Required. Session ID |
+| `chatId` | string | Required. Phone number or group ID |
+| `messageId` | string | Required. Target message ID |
+| `star` | boolean | Optional. `true` to star message, `false` to unstar (default: `true`) |
+| `fromMe` | boolean | Optional. Whether the message was sent by yourself (default: `false`) |
+
+---
+
+## Pin / Unpin Chat
+
+Pin or unpin an entire chat to the top of your chat list.
+
+```http
+POST /chats/pin
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "chatId": "628123456789",
+  "pin": true
+}
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `sessionId` | string | Required. Session ID |
+| `chatId` | string | Required. Phone number or group ID |
+| `pin` | boolean | Optional. `true` to pin chat, `false` to unpin (default: `true`) |
+
+---
+
+## Archive / Unarchive Chat
+
+Archive or unarchive a chat thread.
+
+```http
+POST /chats/archive
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "chatId": "628123456789",
+  "archive": true
+}
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `sessionId` | string | Required. Session ID |
+| `chatId` | string | Required. Phone number or group ID |
+| `archive` | boolean | Optional. `true` to archive chat, `false` to unarchive (default: `true`) |
+
+---
+
+## Mute / Unmute Chat
+
+Mute or unmute notifications for a specific chat.
+
+```http
+POST /chats/mute
+```
+
+**Body:**
+```json
+{
+  "sessionId": "mysession",
+  "chatId": "628123456789",
+  "duration": 28800000
+}
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `sessionId` | string | Required. Session ID |
+| `chatId` | string | Required. Phone number or group ID |
+| `duration` | number \| null | Optional. Mute duration in ms (`28800000` = 8 hours, `604800000` = 1 week, `-1` = indefinitely, `null` = unmute) |
 
 ---
 
